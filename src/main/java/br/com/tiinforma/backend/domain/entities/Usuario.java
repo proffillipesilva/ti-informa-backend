@@ -3,8 +3,8 @@ package br.com.tiinforma.backend.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,30 +14,30 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-public class Video implements Serializable {
+public class Usuario implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String titulo;
-
-    private String descricao;
+    private String nome;
 
     @Column(unique = true)
-    private String url;
+    private String email;
 
-    private LocalDate dataPublicacao = LocalDate.now();
+    private String password;
 
-    private String categoria;
+    private String interesses;
 
-    private String palavraChave;
+    @OneToMany(mappedBy = "usuario")
+    private Set<Assinatura> assinaturas = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "playlist_video",
-    joinColumns = @JoinColumn(name = "id_playlist"),
-    inverseJoinColumns = @JoinColumn(name = "id_video"))
+    @OneToMany(mappedBy = "usuario")
     private Set<Playlist> playlists = new HashSet<>();
+
+
+    Set<Avaliacao> avaliacao = new HashSet<>();
 }

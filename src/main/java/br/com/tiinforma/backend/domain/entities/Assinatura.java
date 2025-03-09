@@ -1,12 +1,10 @@
 package br.com.tiinforma.backend.domain.entities;
 
 import br.com.tiinforma.backend.domain.enums.Plano;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -18,6 +16,7 @@ import java.time.LocalDate;
 @Builder
 public class Assinatura implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -31,4 +30,8 @@ public class Assinatura implements Serializable {
     private LocalDate dataFim;
 
     private Double preco;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 }

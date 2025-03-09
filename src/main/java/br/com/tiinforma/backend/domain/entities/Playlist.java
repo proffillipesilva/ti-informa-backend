@@ -1,13 +1,13 @@
 package br.com.tiinforma.backend.domain.entities;
 
 import br.com.tiinforma.backend.domain.enums.Visibilidade;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -26,4 +26,14 @@ public class Playlist implements Serializable {
     private String nome;
 
     private Visibilidade visibilidade;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "playlists")
+    private Set<Video> videos = new HashSet<>();
+
+
 }
