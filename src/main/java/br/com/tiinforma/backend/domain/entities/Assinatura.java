@@ -30,8 +30,4 @@ public class Assinatura implements Serializable {
     private LocalDate dataFim;
 
     private Double preco;
-
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
 }

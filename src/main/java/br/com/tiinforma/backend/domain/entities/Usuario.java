@@ -31,13 +31,4 @@ public class Usuario implements Serializable {
     private String password;
 
     private String interesses;
-
-    @OneToMany(mappedBy = "usuario")
-    private Set<Assinatura> assinaturas = new HashSet<>();
-
-    @OneToMany(mappedBy = "usuario")
-    private Set<Playlist> playlists = new HashSet<>();
-
-
-    Set<Avaliacao> avaliacao = new HashSet<>();
 }

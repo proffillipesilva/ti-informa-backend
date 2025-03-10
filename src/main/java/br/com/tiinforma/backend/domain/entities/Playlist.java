@@ -26,14 +26,4 @@ public class Playlist implements Serializable {
     private String nome;
 
     private Visibilidade visibilidade;
-
-    @ManyToOne
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
-
-    @JsonIgnore
-    @ManyToMany(mappedBy = "playlists")
-    private Set<Video> videos = new HashSet<>();
-
-
 }

@@ -34,10 +34,4 @@ public class Video implements Serializable {
     private String categoria;
 
     private String palavraChave;
-
-    @ManyToMany
-    @JoinTable(name = "playlist_video",
-    joinColumns = @JoinColumn(name = "id_playlist"),
-    inverseJoinColumns = @JoinColumn(name = "id_video"))
-    private Set<Playlist> playlists = new HashSet<>();
 }
