@@ -14,5 +14,6 @@ import java.io.Serializable;
 public class UsuarioVideoProgressoId implements Serializable {
     private Long usuarioId;
     private Long videoId;
+    private Long avaliacaoId;
 
 }

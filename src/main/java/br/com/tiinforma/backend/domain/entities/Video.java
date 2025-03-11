@@ -42,8 +42,5 @@ public class Video implements Serializable {
     private List<PlaylistVideo> playlistVideos;
 
     @OneToMany(mappedBy = "video")
-    private List<Avaliacao> avaliacoes;
-
-    @OneToMany(mappedBy = "video")
     private List<UsuarioVideoProgresso> progressos;
 }

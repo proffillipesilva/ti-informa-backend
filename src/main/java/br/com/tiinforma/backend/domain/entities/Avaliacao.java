@@ -28,12 +28,7 @@ public class Avaliacao implements Serializable {
     
     private String comentario;
 
-    @ManyToOne
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
-
-    @ManyToOne
-    @JoinColumn(name = "id_video")
-    private Video video;
+    @OneToMany(mappedBy = "avaliacao")
+    private List<UsuarioVideoProgresso> progressos;
 
 }

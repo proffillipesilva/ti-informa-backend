@@ -35,8 +35,8 @@ public class Usuario implements Serializable {
     private List<Playlist> playlists;
 
     @OneToMany(mappedBy = "usuario")
-    private List<Avaliacao> avaliacoes;
+    private List<UsuarioVideoProgresso> progressos;
 
     @OneToMany(mappedBy = "usuario")
-    private List<UsuarioVideoProgresso> progressos;
+    private List<Assinatura> assinaturas;
 }

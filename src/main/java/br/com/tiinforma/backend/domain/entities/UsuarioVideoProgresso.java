@@ -28,6 +28,11 @@ public class UsuarioVideoProgresso {
     @JoinColumn(name = "id_video")
     private Video video;
 
+    @ManyToOne
+    @MapsId("avaliacaoId")
+    @JoinColumn(name = "id_avaliacao")
+    private Avaliacao avaliacao;
+
     private LocalDate dataInicio;
     private LocalDateTime tempoAssistido;
 
