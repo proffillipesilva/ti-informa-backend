@@ -5,8 +5,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -31,4 +30,13 @@ public class Usuario implements Serializable {
     private String password;
 
     private String interesses;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Playlist> playlists;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Avaliacao> avaliacoes;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<UsuarioVideoProgresso> progressos;
 }

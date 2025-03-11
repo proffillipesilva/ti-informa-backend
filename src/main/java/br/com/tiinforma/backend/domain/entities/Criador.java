@@ -5,6 +5,7 @@ import lombok.*;
 
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -33,5 +34,11 @@ public class Criador implements Serializable {
     private String senha;
 
     private String formacao;
+
+    @OneToMany(mappedBy = "criador")
+    private List<Playlist> playlists;
+
+    @OneToMany(mappedBy = "criador")
+    private List<Video> videos;
 
 }

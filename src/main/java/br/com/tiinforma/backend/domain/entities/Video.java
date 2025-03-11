@@ -5,8 +5,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -34,4 +33,17 @@ public class Video implements Serializable {
     private String categoria;
 
     private String palavraChave;
+
+    @ManyToOne
+    @JoinColumn(name = "id_criador")
+    private Criador criador;
+
+    @OneToMany(mappedBy = "video")
+    private List<PlaylistVideo> playlistVideos;
+
+    @OneToMany(mappedBy = "video")
+    private List<Avaliacao> avaliacoes;
+
+    @OneToMany(mappedBy = "video")
+    private List<UsuarioVideoProgresso> progressos;
 }

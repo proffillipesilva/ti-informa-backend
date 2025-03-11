@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -25,5 +26,17 @@ public class Playlist implements Serializable {
 
     private String nome;
 
+    @Enumerated(EnumType.STRING)
     private Visibilidade visibilidade;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
+
+    @ManyToOne
+    @JoinColumn(name = "id_criador")
+    private Criador criador;
+
+    @OneToMany(mappedBy = "playlist")
+    private List<PlaylistVideo> playlistVideos;
 }
