@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,5 +41,6 @@ public class Playlist implements Serializable {
     private Criador criador;
 
     @OneToMany(mappedBy = "playlist")
-    private List<PlaylistVideo> playlistVideos;
+    @Builder.Default
+    private List<PlaylistVideo> playlistVideos= new ArrayList<>();
 }

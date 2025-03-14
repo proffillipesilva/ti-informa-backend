@@ -26,6 +26,7 @@ public class Assinatura implements Serializable {
 
     private Plano plano;
 
+    @Builder.Default
     private LocalDate dataInicio = LocalDate.now();
 
     private LocalDate dataFim;
@@ -34,6 +35,7 @@ public class Assinatura implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
-    private Usuario usuario;
+    @Builder.Default
+    private Usuario usuario = new Usuario();
 
 }
