@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/usuario")
 @CrossOrigin(origins = "http://localhost:8080")
@@ -18,5 +20,10 @@ public class UsuarioController {
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
     public ResponseEntity<UsuarioResponseDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.findById(id));
+    }
+
+    @GetMapping(produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
+    public ResponseEntity<List<UsuarioResponseDto>> findAll() {
+        return ResponseEntity.ok(usuarioService.findAll());
     }
 }

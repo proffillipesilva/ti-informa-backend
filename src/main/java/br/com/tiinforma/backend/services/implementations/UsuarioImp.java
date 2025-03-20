@@ -1,8 +1,10 @@
 package br.com.tiinforma.backend.services.implementations;
 
+import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.mapper.UsuarioMapper;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +23,13 @@ public class UsuarioImp implements UsuarioService {
     public UsuarioResponseDto findById(Long id) {
         var client = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado" + id));
-        return DozerMapper.parseObject(client, UsuarioResponseDto.class);
+        return UsuarioMapper.INSTANCE.toDto(client);
     }
 
     @Override
     public List<UsuarioResponseDto> findAll() {
-        return List.of();
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return UsuarioMapper.INSTANCE.toDtoList(usuarios);
     }
 
     @Override
