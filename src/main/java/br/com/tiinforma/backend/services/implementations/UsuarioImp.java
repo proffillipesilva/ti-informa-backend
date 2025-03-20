@@ -3,7 +3,6 @@ package br.com.tiinforma.backend.services.implementations;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
-import br.com.tiinforma.backend.mapper.DozerMapper;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
