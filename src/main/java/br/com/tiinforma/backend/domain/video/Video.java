@@ -9,6 +9,7 @@ import lombok.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -45,8 +46,10 @@ public class Video implements Serializable {
     private Criador criador;
 
     @OneToMany(mappedBy = "video")
-    private List<PlaylistVideo> playlistVideos;
+    @Builder.Default
+    private List<PlaylistVideo> playlistVideos = new ArrayList<>();
 
     @OneToMany(mappedBy = "video")
-    private List<UsuarioVideoProgresso> progressos;
+    @Builder.Default
+    private List<UsuarioVideoProgresso> progressos = new ArrayList<>();
 }

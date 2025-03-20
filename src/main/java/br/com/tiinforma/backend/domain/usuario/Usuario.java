@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -35,11 +36,14 @@ public class Usuario implements Serializable {
     private String interesses;
 
     @OneToMany(mappedBy = "usuario")
-    private List<Playlist> playlists;
+    @Builder.Default
+    private List<Playlist> playlists= new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario")
-    private List<UsuarioVideoProgresso> progressos;
+    @Builder.Default
+    private List<UsuarioVideoProgresso> progressos = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario")
-    private List<Assinatura> assinaturas;
+    @Builder.Default
+    private List<Assinatura> assinaturas= new ArrayList<>();
 }

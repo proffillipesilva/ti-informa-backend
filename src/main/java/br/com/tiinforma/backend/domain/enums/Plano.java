@@ -3,7 +3,7 @@ package br.com.tiinforma.backend.domain.enums;
 public enum Plano {
     GRATUITO(0, "GRATUITO"),
     PREMIUM(1, "PREMIUM"),
-    PREMIUM_FAMILIA(2, "PREMIUM FAMILIA");
+    FAMILIA(2, "FAMILIA");
 
     private Integer codigo;
     private String descricao;
