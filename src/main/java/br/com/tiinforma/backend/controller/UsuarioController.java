@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.controller;
 
+import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import br.com.tiinforma.backend.util.MediaType;
@@ -25,5 +26,15 @@ public class UsuarioController {
     @GetMapping(produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
     public ResponseEntity<List<UsuarioResponseDto>> findAll() {
         return ResponseEntity.ok(usuarioService.findAll());
+    }
+
+    @PostMapping(value ="/register",produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"},consumes = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
+    public UsuarioResponseDto create(@RequestBody UsuarioCreateDto usuarioCreateDto) {
+        return usuarioService.create(usuarioCreateDto);
+    }
+
+    @PutMapping(produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"},consumes = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
+    public UsuarioCreateDto update(@RequestBody UsuarioCreateDto usuarioCreateDto) {
+        return usuarioService.update(usuarioCreateDto);
     }
 }

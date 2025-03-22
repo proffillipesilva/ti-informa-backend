@@ -6,10 +6,12 @@ import br.com.tiinforma.backend.domain.playlist.PlaylistDto;
 import java.util.List;
 
 public record UsuarioResponseDto(
+        Long id,
         String nome,
         String email,
         String interesses,
         List<PlaylistDto> playlistDtos,
         List<AssinaturaDto> assinaturaDtos
 ) {
+
 }
