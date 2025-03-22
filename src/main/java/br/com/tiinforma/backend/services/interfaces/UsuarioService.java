@@ -12,7 +12,7 @@ public interface UsuarioService {
 
     List<UsuarioResponseDto> findAll();
 
-    UsuarioCreateDto save(UsuarioCreateDto usuarioCreateDto);
+    UsuarioResponseDto create(UsuarioCreateDto usuarioCreateDto);
 
     UsuarioCreateDto update(UsuarioCreateDto usuarioCreateDto);
 

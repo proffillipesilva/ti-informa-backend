@@ -6,6 +6,7 @@ import br.com.tiinforma.backend.domain.playlist.PlaylistDto;
 import java.util.List;
 
 public record UsuarioCreateDto(
+        String id,
         String nome,
         String email,
         String password,
