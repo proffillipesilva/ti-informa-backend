@@ -4,7 +4,7 @@ import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
-import br.com.tiinforma.backend.mapper.UsuarioMapper;
+import br.com.tiinforma.backend.mapper.DozerMapper;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import jakarta.transaction.Transactional;
@@ -21,29 +21,25 @@ public class UsuarioImp implements UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private final UsuarioMapper usuarioMapper;
-
     @Override
     public UsuarioResponseDto findById(Long id) {
-        var client = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado" + id));
-        return UsuarioMapper.INSTANCE.toDto(client);
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + id));
+        return DozerMapper.parseObject(usuario, UsuarioResponseDto.class);
     }
 
     @Override
     public List<UsuarioResponseDto> findAll() {
         List<Usuario> usuarios = usuarioRepository.findAll();
-        return UsuarioMapper.INSTANCE.toDtoList(usuarios);
+        return DozerMapper.parseListObject(usuarios, UsuarioResponseDto.class);
     }
 
     @Override
     public UsuarioResponseDto create(UsuarioCreateDto usuarioCreateDto) {
-        var entity = usuarioMapper.toEntity(usuarioCreateDto);
+        var entity = DozerMapper.parseObject(usuarioCreateDto, Usuario.class);
         entity = usuarioRepository.save(entity);
-        return usuarioMapper.toDto(entity);
+        return DozerMapper.parseObject(entity, UsuarioResponseDto.class);
     }
-
 
     @Override
     @Transactional
@@ -59,11 +55,13 @@ public class UsuarioImp implements UsuarioService {
         usuario.setProgressos(usuario.getProgressos());
 
         var usuarioAtualizado = usuarioRepository.save(usuario);
-        return usuarioMapper.toCreateDto(usuarioAtualizado);
+        return DozerMapper.parseObject(usuarioAtualizado, UsuarioCreateDto.class);
     }
 
     @Override
     public void delete(Long id) {
-
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + id));
+        usuarioRepository.delete(usuario);
     }
 }
