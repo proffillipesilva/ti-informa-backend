@@ -1,15 +1,22 @@
 package br.com.tiinforma.backend.domain.assinatura;
 
 import br.com.tiinforma.backend.domain.enums.Plano;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-public record AssinaturaDto(
-        Long id,
-        Long idUsuario,
-        Plano plano,
-        LocalDate dataInicio,
-        LocalDate dataFim,
-        Double preco
-) {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class AssinaturaDto {
+    private Long id;
+    private Long idUsuario;
+    private Plano plano;
+    private LocalDate dataInicio;
+    private LocalDate dataFim;
+    private Double preco;
 }

@@ -45,8 +45,6 @@ public class UsuarioImp implements UsuarioService {
     }
 
 
-
-
     @Override
     @Transactional
     public UsuarioCreateDto update(UsuarioCreateDto usuarioCreateDto) {

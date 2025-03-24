@@ -1,9 +1,17 @@
 package br.com.tiinforma.backend.domain.playlistVideo;
 
-public record PlaylistVideoDto(
-        Long id,
-        Long idVideo,
-        String videoTitulo,
-        Integer posicaoVideo
-) {
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class PlaylistVideoDto {
+    private Long id;
+    private Long idVideo;
+    private String videoTitulo;
+    private Integer posicaoVideo;
 }
