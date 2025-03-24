@@ -1,8 +1,16 @@
 package br.com.tiinforma.backend.domain.avaliacao;
 
-public record AvaliacaoDto(
-        Long id,
-        Integer nota,
-        String comentario
-) {
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class AvaliacaoDto {
+    private Long id;
+    private Integer nota;
+    private String comentario;
 }
