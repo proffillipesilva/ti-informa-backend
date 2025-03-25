@@ -1,11 +1,15 @@
 package br.com.tiinforma.backend.mapper;
 
+
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Configuration
 public class DozerMapper {
     private static Mapper mapper = DozerBeanMapperBuilder.buildDefault();
 
