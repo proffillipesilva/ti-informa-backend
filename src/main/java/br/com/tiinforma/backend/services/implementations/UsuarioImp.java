@@ -42,11 +42,11 @@ public class UsuarioImp implements UsuarioService {
     public UsuarioResponseDto create(UsuarioCreateDto usuarioCreateDto) {
         var entity = modelMapper.map(usuarioCreateDto, Usuario.class);
         entity = usuarioRepository.save(entity);
-        return modelMapper.map(entity, UsuarioResponseDto.class); /
+        return modelMapper.map(entity, UsuarioResponseDto.class);
     }
 
     @Override
-    public UsuarioCreateDto update(UsuarioCreateDto usuarioCreateDto) {
+    public UsuarioResponseDto update(UsuarioCreateDto usuarioCreateDto) {
         var usuario = usuarioRepository.findById(Long.valueOf(usuarioCreateDto.getId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado"));
 
@@ -58,7 +58,7 @@ public class UsuarioImp implements UsuarioService {
         usuario.setProgressos(usuario.getProgressos());
 
         var usuarioAtualizado = usuarioRepository.save(usuario);
-        return modelMapper.map(usuarioAtualizado, UsuarioCreateDto.class);
+        return modelMapper.map(usuarioAtualizado, UsuarioResponseDto.class);
     }
 
     @Override

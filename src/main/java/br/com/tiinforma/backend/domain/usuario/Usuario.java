@@ -35,7 +35,7 @@ public class Usuario implements Serializable {
 
     private String interesses;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Playlist> playlists= new ArrayList<>();
 
@@ -43,7 +43,7 @@ public class Usuario implements Serializable {
     @Builder.Default
     private List<UsuarioVideoProgresso> progressos = new ArrayList<>();
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Assinatura> assinaturas= new ArrayList<>();
 }

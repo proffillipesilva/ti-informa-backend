@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UsuarioCreateDto {
-    private String id;
+    private Long id;
     private String nome;
     private String email;
 
