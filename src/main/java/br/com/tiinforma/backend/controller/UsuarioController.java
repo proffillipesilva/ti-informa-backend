@@ -33,8 +33,11 @@ public class UsuarioController {
         return usuarioService.create(usuarioCreateDto);
     }
 
-    @PutMapping(produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"},consumes = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
-    public UsuarioCreateDto update(@RequestBody UsuarioCreateDto usuarioCreateDto) {
-        return usuarioService.update(usuarioCreateDto);
+    @PutMapping(value = "/{id}",produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"},consumes = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
+    public ResponseEntity<UsuarioCreateDto> update(@PathVariable Long id, @RequestBody UsuarioCreateDto dto) {
+        dto.setId(id);
+        UsuarioCreateDto atualizado = usuarioService.update(dto);
+        return ResponseEntity.ok(atualizado);
     }
+
 }
