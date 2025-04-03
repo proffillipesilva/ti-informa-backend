@@ -1,6 +1,7 @@
 package br.com.tiinforma.backend.domain.usuario;
 
 import br.com.tiinforma.backend.domain.assinatura.Assinatura;
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.usuarioVideoProgresso.UsuarioVideoProgresso;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
 import jakarta.persistence.*;
@@ -31,9 +32,11 @@ public class Usuario implements Serializable {
     @Column(unique = true)
     private String email;
 
-    private String password;
+    private String senha;
 
     private String interesses;
+
+    private Funcao funcao = Funcao.USUARIO;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default

@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.config;
+package br.com.tiinforma.backend.config.web;
 
 import br.com.tiinforma.backend.serialization.converter.YamlJackson2HttpMessageConverter;
 import org.springframework.context.annotation.Configuration;

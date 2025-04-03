@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.criador;
 
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
 import br.com.tiinforma.backend.domain.video.Video;
 import jakarta.persistence.*;
@@ -37,6 +38,8 @@ public class Criador implements Serializable {
     private String senha;
 
     private String formacao;
+
+    private Funcao funcao = Funcao.CRIADOR;
 
     @OneToMany(mappedBy = "criador")
     @Builder.Default

@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.services.db;
 import br.com.tiinforma.backend.domain.avaliacao.Avaliacao;
 import br.com.tiinforma.backend.domain.assinatura.Assinatura;
 import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.enums.Plano;
 import br.com.tiinforma.backend.domain.enums.Visibilidade;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
@@ -57,14 +58,16 @@ public class DBService {
                 Usuario.builder()
                         .nome("Ana Silva")
                         .email("ana.silva@email.com")
-                        .password("senha123")
+                        .senha("senha123")
                         .interesses("Rock, Jazz")
+                        .funcao(Funcao.USUARIO)
                         .build(),
                 Usuario.builder()
                         .nome("Carlos Oliveira")
                         .email("carlos.oliveira@email.com")
-                        .password("senha456")
+                        .senha("senha456")
                         .interesses("Eletrônica, Techno")
+                        .funcao(Funcao.USUARIO)
                         .build()
         );
         usuarioRepository.saveAll(usuarios);
@@ -79,6 +82,7 @@ public class DBService {
                         .rg("SP-1234567")
                         .senha("senha123")
                         .formacao("Cinema e Audiovisual")
+                        .funcao(Funcao.CRIADOR)
                         .build(),
                 Criador.builder()
                         .nome("Beatriz MusicPro")
@@ -87,6 +91,7 @@ public class DBService {
                         .rg("RJ-7654321")
                         .senha("senha456")
                         .formacao("Produção Musical")
+                        .funcao(Funcao.CRIADOR)
                         .build()
         );
         criadorRepository.saveAll(criadores);

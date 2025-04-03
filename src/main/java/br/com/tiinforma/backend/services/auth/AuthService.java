@@ -1,37 +1,36 @@
 package br.com.tiinforma.backend.services.auth;
 
+
+import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
+import br.com.tiinforma.backend.repositories.CriadorRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService {
+public class AuthService implements UserDetailsService {
 
-    private final UsuarioRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    public AuthService(UsuarioRepository userRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
-    }
+    @Autowired
+    private CriadorRepository criadorRepository;
 
-    public boolean authenticate(String username, String password) {
-        Usuario user = userRepository.findByEmail(username);
-        if (user != null) {
-            return passwordEncoder.matches(password, user.getPassword()); // Verifica se as senhas batem
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if( usuario != null) {
+            return new UserDetailsImpl(usuario);
         }
-        return false;
-    }
 
-    public Usuario registrarUsuario(String nome, String password) {
-        String encodedPassword = passwordEncoder.encode(password);
-        Usuario user = Usuario.builder()
-                .nome(nome)
-                .password(encodedPassword)
-                .build();
-        return userRepository.save(user);
+        Criador criador = criadorRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario não encontrado"));
+        return new UserDetailsImpl(criador);
     }
-
 }

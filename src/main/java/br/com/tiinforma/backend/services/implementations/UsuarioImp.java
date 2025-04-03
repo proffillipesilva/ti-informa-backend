@@ -52,7 +52,7 @@ public class UsuarioImp implements UsuarioService {
 
         usuario.setNome(usuarioCreateDto.getNome());
         usuario.setEmail(usuarioCreateDto.getEmail());
-        usuario.setPassword(usuarioCreateDto.getPassword());
+        usuario.setSenha(usuarioCreateDto.getPassword());
         usuario.setInteresses(usuarioCreateDto.getInteresses());
         usuario.setAssinaturas(usuario.getAssinaturas());
         usuario.setProgressos(usuario.getProgressos());

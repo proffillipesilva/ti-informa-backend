@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.domain.usuario;
+package br.com.tiinforma.backend.domain.dtosComuns;
 
 
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsuarioLoginDto {
+public class AuthLoginDto {
     private String email;
-    private String password;
+    private String senha;
 }
