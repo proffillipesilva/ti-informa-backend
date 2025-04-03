@@ -44,13 +44,13 @@ public class UsuarioImp implements UsuarioService {
     @Override
     @Transactional
     public UsuarioCreateDto update(UsuarioCreateDto usuarioCreateDto) {
-        var usuario = usuarioRepository.findById(Long.valueOf(usuarioCreateDto.id()))
+        var usuario = usuarioRepository.findById(usuarioCreateDto.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado"));
 
-        usuario.setNome(usuarioCreateDto.nome());
-        usuario.setEmail(usuarioCreateDto.email());
-        usuario.setPassword(usuarioCreateDto.password());
-        usuario.setInteresses(usuarioCreateDto.interesses());
+        usuario.setNome(usuarioCreateDto.getNome());
+        usuario.setEmail(usuarioCreateDto.getEmail());
+        usuario.setPassword(usuarioCreateDto.getPassword());
+        usuario.setInteresses(usuarioCreateDto.getInteresses());
         usuario.setAssinaturas(usuario.getAssinaturas());
         usuario.setProgressos(usuario.getProgressos());
 
