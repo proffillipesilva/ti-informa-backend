@@ -1,13 +1,11 @@
 package br.com.tiinforma.backend.controller;
 
-
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaCreateDto;
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaDto;
-
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.services.implementations.AssinaturaImpl;
+import br.com.tiinforma.backend.util.MediaType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,51 +13,53 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/assinaturas")
+@CrossOrigin(origins = "http://localhost:8080")
 @RequiredArgsConstructor
 public class AssinaturaController {
 
     private final AssinaturaImpl assinaturaService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AssinaturaDto> getAssinaturaById(@PathVariable Long id) {
-        try {
-            AssinaturaDto assinaturaDto = assinaturaService.findById(id);
-            return ResponseEntity.ok(assinaturaDto);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    @GetMapping(
+            value = "/{id}",
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
+    )
+    public ResponseEntity<AssinaturaDto> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(assinaturaService.findById(id));
     }
 
-    @GetMapping
-    public ResponseEntity<List<AssinaturaDto>> getAllAssinaturas() {
-        List<AssinaturaDto> assinaturas = assinaturaService.findAll();
-        return ResponseEntity.ok(assinaturas);
+    @GetMapping(
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
+    )
+    public ResponseEntity<List<AssinaturaDto>> findAll() {
+        return ResponseEntity.ok(assinaturaService.findAll());
     }
 
-    @PostMapping
-    public ResponseEntity<AssinaturaDto> createAssinatura(@RequestBody AssinaturaCreateDto assinaturaCreateDto) {
-        AssinaturaDto assinaturaDto = assinaturaService.create(assinaturaCreateDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(assinaturaDto);
+    @PostMapping(
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
+            consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
+    )
+    public ResponseEntity<AssinaturaDto> create(@RequestBody AssinaturaCreateDto assinaturaCreateDto) {
+        AssinaturaDto created = assinaturaService.create(assinaturaCreateDto);
+        return ResponseEntity.status(201).body(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AssinaturaCreateDto> updateAssinatura(@PathVariable Long id, @RequestBody AssinaturaCreateDto assinaturaCreateDto) {
+    @PutMapping(
+            value = "/{id}",
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
+            consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
+    )
+    public ResponseEntity<AssinaturaCreateDto> update(@PathVariable Long id, @RequestBody AssinaturaCreateDto assinaturaCreateDto) {
         assinaturaCreateDto.setUserId(id);
-        try {
-            AssinaturaCreateDto updatedAssinatura = assinaturaService.update(assinaturaCreateDto);
-            return ResponseEntity.ok(updatedAssinatura);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        AssinaturaCreateDto updated = assinaturaService.update(assinaturaCreateDto);
+        return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAssinatura(@PathVariable Long id) {
-        try {
-            assinaturaService.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+    @DeleteMapping(
+            value = "/{id}",
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
+    )
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        assinaturaService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
