@@ -48,18 +48,17 @@ public class AuthController {
         );
 
         var auth = this.authenticationManager.authenticate(usernameSenha);
-
-
         var principal = auth.getPrincipal();
 
         if (principal instanceof UserDetailsImpl userDetails) {
-            String token = tokenService.gerarToken(userDetails.getUsername());
+            String token = tokenService.gerarToken(userDetails); // Agora está correto
 
-            return ResponseEntity.ok((new LoginResponseDto(token)));
+            return ResponseEntity.ok(new LoginResponseDto(token));
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Erro ao autenticar usuário.");
     }
+
 
 
 

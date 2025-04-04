@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.security.jwt;
 
+import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -7,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -16,21 +18,17 @@ import java.util.Date;
 
 @Service
 public class TokenService {
-
-    @Value("${jwt.secret}")
+    @Value("${api.security.token.secret}")
     private String secret;
 
-    private Key getChaveSecreta() {
-        byte[] decodedKey = Base64.getDecoder().decode(secret); // Decode Base64
-        return Keys.hmacShaKeyFor(decodedKey);
-    }
-    
-    public String gerarToken(String email) {
+    public String gerarToken(UserDetailsImpl userDetails) {
+        SecretKey key = getChaveSecreta();
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
+                .setIssuer("auth-api")
+                .setSubject(userDetails.getUsername()) // ou getLogin(), dependendo da implementação
+                .claim("role", userDetails.getAuthorities()) // Adiciona perfil (opcional)
                 .setExpiration(gerarDataExpiracao())
-                .signWith(getChaveSecreta()) // Simplified
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -50,10 +48,15 @@ public class TokenService {
 
     private Claims extrairClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getChaveSecreta()) // Ajustado para usar o método correto
+                .setSigningKey(getChaveSecreta()) // Agora o método existe e funciona corretamente
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private SecretKey getChaveSecreta() {
+        byte[] decodedKey = Base64.getDecoder().decode(secret); // Decodifica corretamente a chave Base64
+        return Keys.hmacShaKeyFor(decodedKey);
     }
 
     public boolean isTokenExpirado(String token) {
