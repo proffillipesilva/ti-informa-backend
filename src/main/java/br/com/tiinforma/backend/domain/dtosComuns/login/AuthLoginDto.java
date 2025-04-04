@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.domain.dtosComuns;
+package br.com.tiinforma.backend.domain.dtosComuns.login;
 
 
 import lombok.AllArgsConstructor;

@@ -1,49 +1,64 @@
-// JwtAuthenticationFilter.java
 package br.com.tiinforma.backend.security.jwt;
 
+import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
+import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    @Autowired
+    private TokenService tokenService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CriadorRepository criadorRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String token = request.getHeader("Authorization");
+        var token = this.recoverToken(request);
 
-        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
-            token = token.substring(7);
+        if (token != null) {
+            var email = tokenService.extrairUsuario(token); // Extraímos o e-mail corretamente
 
-            String usuario = jwtUtil.extrairUsuario(token);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails usuario = usuarioRepository.findByEmail(email)
+                        .map(UserDetailsImpl::new) // Converte Usuario para UserDetailsImpl
+                        .orElseGet(() -> criadorRepository.findByEmail(email)
+                                .map(UserDetailsImpl::new) // Converte Criador para UserDetailsImpl
+                                .orElse(null));
 
-            if (usuario != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (jwtUtil.validarToken(token, usuario)) {
-                    Authentication auth = new UsernamePasswordAuthenticationToken(
-                            new User(usuario, "", new ArrayList<>()), null, new ArrayList<>()
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+                if (usuario != null) {
+                    var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         }
 
         chain.doFilter(request, response);
+    }
+
+    private String recoverToken(HttpServletRequest request) {
+        var authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        return authHeader.replace("Bearer ", "");
     }
 }

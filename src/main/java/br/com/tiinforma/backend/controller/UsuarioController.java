@@ -35,8 +35,7 @@ public class UsuarioController {
 
     @PutMapping(value = "/{id}",produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"},consumes = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
     public ResponseEntity<UsuarioResponseDto> update(@PathVariable Long id,@RequestBody UsuarioCreateDto dto) {
-        dto.setId(id);
-        UsuarioResponseDto usuarioAtualizado = usuarioService.update(dto);
+        UsuarioResponseDto usuarioAtualizado = usuarioService.update(id,dto);
         return ResponseEntity.ok(usuarioAtualizado);
     }
 

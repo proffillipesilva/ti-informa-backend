@@ -46,13 +46,13 @@ public class UsuarioImp implements UsuarioService {
     }
 
     @Override
-    public UsuarioResponseDto update(UsuarioCreateDto usuarioCreateDto) {
-        var usuario = usuarioRepository.findById(Long.valueOf(usuarioCreateDto.getId()))
+    public UsuarioResponseDto update(Long id, UsuarioCreateDto usuarioCreateDto) {
+        var usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado"));
 
         usuario.setNome(usuarioCreateDto.getNome());
         usuario.setEmail(usuarioCreateDto.getEmail());
-        usuario.setSenha(usuarioCreateDto.getPassword());
+        usuario.setSenha(usuarioCreateDto.getSenha());
         usuario.setInteresses(usuarioCreateDto.getInteresses());
         usuario.setAssinaturas(usuario.getAssinaturas());
         usuario.setProgressos(usuario.getProgressos());
@@ -60,6 +60,7 @@ public class UsuarioImp implements UsuarioService {
         var usuarioAtualizado = usuarioRepository.save(usuario);
         return modelMapper.map(usuarioAtualizado, UsuarioResponseDto.class);
     }
+
 
     @Override
     public void delete(Long id) {
