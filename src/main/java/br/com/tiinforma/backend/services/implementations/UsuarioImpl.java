@@ -14,9 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 @Service
-public class UsuarioImp implements UsuarioService {
+public class UsuarioImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -27,7 +26,7 @@ public class UsuarioImp implements UsuarioService {
     @Override
     public UsuarioResponseDto findById(Long id) {
         var usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado: " + id));
         return modelMapper.map(usuario, UsuarioResponseDto.class);
     }
 
@@ -48,7 +47,7 @@ public class UsuarioImp implements UsuarioService {
     @Override
     public UsuarioResponseDto update(Long id, UsuarioCreateDto usuarioCreateDto) {
         var usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado"));
 
         usuario.setNome(usuarioCreateDto.getNome());
         usuario.setEmail(usuarioCreateDto.getEmail());
@@ -65,7 +64,7 @@ public class UsuarioImp implements UsuarioService {
     @Override
     public void delete(Long id) {
         var usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario não encontrado: " + id));
         usuarioRepository.delete(usuario);
     }
 }

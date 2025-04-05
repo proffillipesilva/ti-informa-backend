@@ -1,6 +1,5 @@
 package br.com.tiinforma.backend.domain.criador;
 
-import br.com.tiinforma.backend.domain.enums.Funcao;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
