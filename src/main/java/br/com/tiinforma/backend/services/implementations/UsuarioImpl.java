@@ -4,64 +4,66 @@ import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
-import br.com.tiinforma.backend.mapper.DozerMapper;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-@AllArgsConstructor
 @Service
-public class UsuarioImp implements UsuarioService {
+public class UsuarioImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
     public UsuarioResponseDto findById(Long id) {
         var usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + id));
-        return DozerMapper.parseObject(usuario, UsuarioResponseDto.class);
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
+        return modelMapper.map(usuario, UsuarioResponseDto.class);
     }
 
     @Override
     public List<UsuarioResponseDto> findAll() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        return DozerMapper.parseListObject(usuarios, UsuarioResponseDto.class);
+        return usuarioRepository.findAll().stream()
+                .map(usuario -> modelMapper.map(usuario, UsuarioResponseDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     public UsuarioResponseDto create(UsuarioCreateDto usuarioCreateDto) {
-        var entity = DozerMapper.parseObject(usuarioCreateDto, Usuario.class);
+        var entity = modelMapper.map(usuarioCreateDto, Usuario.class);
         entity = usuarioRepository.save(entity);
-        return DozerMapper.parseObject(entity, UsuarioResponseDto.class);
+        return modelMapper.map(entity, UsuarioResponseDto.class);
     }
 
     @Override
-    @Transactional
-    public UsuarioCreateDto update(UsuarioCreateDto usuarioCreateDto) {
-        var usuario = usuarioRepository.findById(usuarioCreateDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado"));
+    public UsuarioResponseDto update(Long id, UsuarioCreateDto usuarioCreateDto) {
+        var usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         usuario.setNome(usuarioCreateDto.getNome());
         usuario.setEmail(usuarioCreateDto.getEmail());
-        usuario.setPassword(usuarioCreateDto.getPassword());
+        usuario.setSenha(usuarioCreateDto.getSenha());
         usuario.setInteresses(usuarioCreateDto.getInteresses());
         usuario.setAssinaturas(usuario.getAssinaturas());
         usuario.setProgressos(usuario.getProgressos());
 
         var usuarioAtualizado = usuarioRepository.save(usuario);
-        return DozerMapper.parseObject(usuarioAtualizado, UsuarioCreateDto.class);
+        return modelMapper.map(usuarioAtualizado, UsuarioResponseDto.class);
     }
 
     @Override
     public void delete(Long id) {
         var usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
         usuarioRepository.delete(usuario);
     }
 }

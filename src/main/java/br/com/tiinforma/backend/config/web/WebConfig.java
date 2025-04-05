@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.config;
+package br.com.tiinforma.backend.config.web;
 
 import br.com.tiinforma.backend.serialization.converter.YamlJackson2HttpMessageConverter;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:63343")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
 }

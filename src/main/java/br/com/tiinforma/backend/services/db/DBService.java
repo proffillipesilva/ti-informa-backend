@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.services.db;
 import br.com.tiinforma.backend.domain.avaliacao.Avaliacao;
 import br.com.tiinforma.backend.domain.assinatura.Assinatura;
 import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.enums.Plano;
 import br.com.tiinforma.backend.domain.enums.Visibilidade;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
@@ -12,6 +13,8 @@ import br.com.tiinforma.backend.repositories.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -38,6 +41,8 @@ public class DBService {
     @Autowired
     VideoRepository videoRepository;
 
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @PostConstruct
     public void initDatabase() {
         if (usuarioRepository.count() == 0) {
@@ -57,14 +62,16 @@ public class DBService {
                 Usuario.builder()
                         .nome("Ana Silva")
                         .email("ana.silva@email.com")
-                        .password("senha123")
+                        .senha(passwordEncoder.encode("senha123")) // Criptografando senha
                         .interesses("Rock, Jazz")
+                        .funcao(Funcao.USUARIO)
                         .build(),
                 Usuario.builder()
                         .nome("Carlos Oliveira")
                         .email("carlos.oliveira@email.com")
-                        .password("senha456")
+                        .senha(passwordEncoder.encode("senha456")) // Criptografando senha
                         .interesses("Eletrônica, Techno")
+                        .funcao(Funcao.USUARIO)
                         .build()
         );
         usuarioRepository.saveAll(usuarios);
@@ -77,16 +84,18 @@ public class DBService {
                         .email("lucas.filmmaker@email.com")
                         .cpf("12345678901")
                         .rg("SP-1234567")
-                        .senha("senha123")
+                        .senha(passwordEncoder.encode("senha123"))
                         .formacao("Cinema e Audiovisual")
+                        .funcao(Funcao.CRIADOR)
                         .build(),
                 Criador.builder()
                         .nome("Beatriz MusicPro")
                         .email("beatriz.music@email.com")
                         .cpf("98765432109")
                         .rg("RJ-7654321")
-                        .senha("senha456")
+                        .senha(passwordEncoder.encode("senha456"))
                         .formacao("Produção Musical")
+                        .funcao(Funcao.CRIADOR)
                         .build()
         );
         criadorRepository.saveAll(criadores);

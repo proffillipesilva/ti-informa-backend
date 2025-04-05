@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.criador;
 
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -14,4 +15,5 @@ public class CriadorResponseDto {
     private String nome;
     private String email;
     private String formacao;
+    private Funcao funcao;
 }
