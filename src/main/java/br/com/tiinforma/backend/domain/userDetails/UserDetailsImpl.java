@@ -5,12 +5,19 @@ import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
 

@@ -32,10 +32,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        var token = this.recoverToken(request);
+        var token = recoverToken(request);
 
         if (token != null) {
             var email = tokenService.extrairUsuario(token); // Extraímos o e-mail corretamente
+
+            // 👇 AQUI: debug completo
+            System.out.println("TOKEN: " + token);
+            System.out.println("EMAIL do TOKEN: " + email);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails usuario = usuarioRepository.findByEmail(email)
@@ -44,7 +48,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .map(UserDetailsImpl::new) // Converte Criador para UserDetailsImpl
                                 .orElse(null));
 
+                System.out.println("USUÁRIO encontrado? " + (usuario != null)); // 👈 Aqui também
+
                 if (usuario != null) {
+                    System.out.println("Email autenticado: " + usuario.getUsername());
+                    System.out.println("Permissões: " + usuario.getAuthorities());
                     var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
@@ -53,6 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         chain.doFilter(request, response);
     }
+
 
     private String recoverToken(HttpServletRequest request) {
         var authHeader = request.getHeader("Authorization");

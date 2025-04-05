@@ -32,9 +32,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/usuario").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/criador").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/videos").hasAuthority("ROLE_CRIADOR") // Corrigido
+                        .requestMatchers(HttpMethod.GET, "/usuario").authenticated() // ✅ Apenas autenticado, sem checar papel
                         .anyRequest().authenticated()
                 )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Adiciona filtro JWT antes da autenticação padrão
         return http.build();
     }
