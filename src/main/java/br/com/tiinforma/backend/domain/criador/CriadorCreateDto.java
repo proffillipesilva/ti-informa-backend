@@ -36,5 +36,4 @@ public class CriadorCreateDto {
         private String senha;
 
         private String formacao;
-        private Funcao funcao;
 }

@@ -24,5 +24,4 @@ public class UsuarioCreateDto {
     )
     private String senha;
     private String interesses;
-    private Funcao funcao;
 }

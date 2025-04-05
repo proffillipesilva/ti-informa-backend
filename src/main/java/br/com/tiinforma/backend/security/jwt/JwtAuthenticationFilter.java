@@ -37,7 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             var email = tokenService.extrairUsuario(token); // Extraímos o e-mail corretamente
 
-            // 👇 AQUI: debug completo
             System.out.println("TOKEN: " + token);
             System.out.println("EMAIL do TOKEN: " + email);
 

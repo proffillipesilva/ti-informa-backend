@@ -32,7 +32,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/usuario").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/criador").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/usuario").authenticated() // ✅ Apenas autenticado, sem checar papel
                         .anyRequest().authenticated()
                 )
 
