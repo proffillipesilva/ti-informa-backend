@@ -32,7 +32,8 @@ public class UsuarioImpl implements UsuarioService {
 
     @Override
     public List<UsuarioResponseDto> findAll() {
-        return usuarioRepository.findAll().stream()
+        return usuarioRepository.findAll()
+                .stream()
                 .map(usuario -> modelMapper.map(usuario, UsuarioResponseDto.class))
                 .collect(Collectors.toList());
     }
@@ -53,8 +54,6 @@ public class UsuarioImpl implements UsuarioService {
         usuario.setEmail(usuarioCreateDto.getEmail());
         usuario.setSenha(usuarioCreateDto.getSenha());
         usuario.setInteresses(usuarioCreateDto.getInteresses());
-        usuario.setAssinaturas(usuario.getAssinaturas());
-        usuario.setProgressos(usuario.getProgressos());
 
         var usuarioAtualizado = usuarioRepository.save(usuario);
         return modelMapper.map(usuarioAtualizado, UsuarioResponseDto.class);

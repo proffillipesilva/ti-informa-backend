@@ -1,6 +1,5 @@
 package br.com.tiinforma.backend.domain.usuario;
 
-
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +17,4 @@ public class UsuarioResponseDto {
     private String email;
     private String interesses;
     private Funcao funcao;
-
 }

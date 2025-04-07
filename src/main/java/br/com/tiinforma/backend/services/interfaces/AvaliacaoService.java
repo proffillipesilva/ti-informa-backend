@@ -1,16 +1,16 @@
 package br.com.tiinforma.backend.services.interfaces;
 
 import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoCreateDto;
-import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoDto;
+import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoResponseDto;
 
 import java.util.List;
 
 public interface AvaliacaoService {
-    AvaliacaoDto findById(Long id);
+    AvaliacaoResponseDto findById(Long id);
 
-    List<AvaliacaoDto> findAll();
+    List<AvaliacaoResponseDto> findAll();
 
-    AvaliacaoDto create(AvaliacaoCreateDto avaliacaoCreateDto);
+    AvaliacaoResponseDto create(AvaliacaoCreateDto avaliacaoCreateDto);
 
     AvaliacaoCreateDto update(AvaliacaoCreateDto avaliacaoCreateDto);
 
