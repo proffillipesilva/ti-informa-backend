@@ -33,7 +33,7 @@ public class Playlist implements Serializable {
     private Visibilidade visibilidade;
 
     @ManyToOne
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
     @ManyToOne
