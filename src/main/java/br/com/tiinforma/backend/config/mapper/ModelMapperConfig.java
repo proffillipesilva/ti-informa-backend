@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.mapper;
+package br.com.tiinforma.backend.config.mapper;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
