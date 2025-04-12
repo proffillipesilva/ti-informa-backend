@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Adiciona filtro JWT antes da autenticação padrão
         return http.build();
     }
