@@ -136,11 +136,25 @@
 			<artifactId>spring-security-oauth2-client</artifactId>
 			<version>6.4.4</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-jose</artifactId>
-			<version>5.8.0</version> <!-- Use the latest version available -->
+			<version>6.4.4</version> <!-- Atualize para a versão compatível -->
 		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 

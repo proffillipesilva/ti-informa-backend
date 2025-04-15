@@ -10,6 +10,7 @@ import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
+import br.com.tiinforma.backend.security.OAuth2AuthenticationSuccessHandler;
 import br.com.tiinforma.backend.security.jwt.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,10 @@ public class AuthController {
         var usernameSenha = new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(), loginRequest.getSenha()
         );
+
+        String googleLogin = new OAuth2AuthenticationSuccessHandler().toString();
+
+        System.out.println(googleLogin);
 
         var auth = this.authenticationManager.authenticate(usernameSenha);
         var principal = auth.getPrincipal();
