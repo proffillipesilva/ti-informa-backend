@@ -18,11 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -48,9 +47,7 @@ public class AuthController {
                 loginRequest.getEmail(), loginRequest.getSenha()
         );
 
-        String googleLogin = new OAuth2AuthenticationSuccessHandler().toString();
 
-        System.out.println(googleLogin);
 
         var auth = this.authenticationManager.authenticate(usernameSenha);
         var principal = auth.getPrincipal();
@@ -121,4 +118,51 @@ public class AuthController {
 
         return ResponseEntity.ok("Criador cadastrado com sucesso!");
     }
+
+    @PutMapping("/auth/completar-cadastro/usuario")
+    public ResponseEntity<?> completarCadastroUsuario(
+            @RequestBody @Valid UsuarioCreateDto usuarioDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(userDetails.getId());
+
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        usuario.setSenha(new BCryptPasswordEncoder().encode(usuarioDto.getSenha()));
+        usuario.setInteresses(usuarioDto.getInteresses());
+
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok("Cadastro atualizado com sucesso!");
+    }
+
+
+
+    @PutMapping("/auth/completar-cadastro/criador")
+    public ResponseEntity<?> completarCadastroCriador(
+            @RequestBody @Valid CriadorCreateDto criadorDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        Optional<Criador> criadorOptional = criadorRepository.findById(userDetails.getId());
+
+        if (criadorOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Criador não encontrado");
+        }
+
+        Criador criador = criadorOptional.get();
+
+        criador.setSenha(new BCryptPasswordEncoder().encode(criadorDto.getSenha()));
+        criador.setCpf(criadorDto.getCpf());
+        criador.setRg(criadorDto.getRg());
+        criador.setFormacao(criadorDto.getFormacao());
+
+        criadorRepository.save(criador);
+
+        return ResponseEntity.ok("Cadastro de criador atualizado com sucesso!");
+    }
+
 }
