@@ -119,7 +119,7 @@ public class AuthController {
         return ResponseEntity.ok("Criador cadastrado com sucesso!");
     }
 
-    @PutMapping("/auth/completar-cadastro/usuario")
+    @PutMapping("/completar-cadastro/usuario")
     public ResponseEntity<?> completarCadastroUsuario(
             @RequestBody @Valid UsuarioCreateDto usuarioDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails
@@ -142,7 +142,7 @@ public class AuthController {
 
 
 
-    @PutMapping("/auth/completar-cadastro/criador")
+    @PutMapping("/completar-cadastro/criador")
     public ResponseEntity<?> completarCadastroCriador(
             @RequestBody @Valid CriadorCreateDto criadorDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails
