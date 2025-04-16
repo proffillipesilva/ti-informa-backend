@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssinaturaDto {
+public class AssinaturaResponseDto {
     private Long id;
     private Long idUsuario;
     private Plano plano;

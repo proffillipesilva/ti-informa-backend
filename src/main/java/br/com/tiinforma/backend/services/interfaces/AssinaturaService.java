@@ -1,16 +1,16 @@
 package br.com.tiinforma.backend.services.interfaces;
 
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaCreateDto;
-import br.com.tiinforma.backend.domain.assinatura.AssinaturaDto;
+import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
 
 import java.util.List;
 
 public interface AssinaturaService {
-    AssinaturaDto findById(Long id);
+    AssinaturaResponseDto findById(Long id);
 
-    List<AssinaturaDto> findAll();
+    List<AssinaturaResponseDto> findAll();
 
-    AssinaturaDto create(AssinaturaCreateDto assinaturaCreateDto);
+    AssinaturaResponseDto create(AssinaturaCreateDto assinaturaCreateDto);
 
     AssinaturaCreateDto update(AssinaturaCreateDto assinaturaCreateDto);
 

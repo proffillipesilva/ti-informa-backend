@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AvaliacaoDto {
+public class AvaliacaoResponseDto {
     private Long id;
     private Integer nota;
     private String comentario;

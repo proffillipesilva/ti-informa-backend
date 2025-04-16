@@ -1,8 +1,7 @@
 package br.com.tiinforma.backend.controller;
 
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaCreateDto;
-import br.com.tiinforma.backend.domain.assinatura.AssinaturaDto;
-import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
 import br.com.tiinforma.backend.services.implementations.AssinaturaImpl;
 import br.com.tiinforma.backend.util.MediaType;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +22,14 @@ public class AssinaturaController {
             value = "/{id}",
             produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
     )
-    public ResponseEntity<AssinaturaDto> findById(@PathVariable Long id) {
+    public ResponseEntity<AssinaturaResponseDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(assinaturaService.findById(id));
     }
 
     @GetMapping(
             produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
     )
-    public ResponseEntity<List<AssinaturaDto>> findAll() {
+    public ResponseEntity<List<AssinaturaResponseDto>> findAll() {
         return ResponseEntity.ok(assinaturaService.findAll());
     }
 
@@ -38,8 +37,8 @@ public class AssinaturaController {
             produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
             consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
     )
-    public ResponseEntity<AssinaturaDto> create(@RequestBody AssinaturaCreateDto assinaturaCreateDto) {
-        AssinaturaDto created = assinaturaService.create(assinaturaCreateDto);
+    public ResponseEntity<AssinaturaResponseDto> create(@RequestBody AssinaturaCreateDto assinaturaCreateDto) {
+        AssinaturaResponseDto created = assinaturaService.create(assinaturaCreateDto);
         return ResponseEntity.status(201).body(created);
     }
 
