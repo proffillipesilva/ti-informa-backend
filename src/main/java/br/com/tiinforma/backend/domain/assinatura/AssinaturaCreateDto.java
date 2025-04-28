@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @AllArgsConstructor
-
 public class AssinaturaCreateDto {
     @NotNull(message = "O ID do usuário é obrigatório")
     private Long userId;

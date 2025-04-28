@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.avaliacao;
 
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AvaliacaoResponseDto {
-    private Long id;
+    @Size(max = 10)
     private Integer nota;
     private String comentario;
 }
