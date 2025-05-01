@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.services.interfaces;
 
+import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import java.util.List;
@@ -14,4 +15,6 @@ public interface CriadorService {
     CriadorResponseDto update(Long id,CriadorCreateDto criadorCreateDto);
 
     void delete(Long id);
+
+    Criador buscarPorEmail(String email);
 }
