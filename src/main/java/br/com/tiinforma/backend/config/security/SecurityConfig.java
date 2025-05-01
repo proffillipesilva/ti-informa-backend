@@ -50,10 +50,10 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/google")  // Personaliza a URL de login
-                        .successHandler(oAuth2AuthenticationSuccessHandler)  // Handler após o sucesso
-                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/oauth2/authorization/google")  // Personaliza a URL de login
+//                        .successHandler(oAuth2AuthenticationSuccessHandler)  // Handler após o sucesso
+//                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

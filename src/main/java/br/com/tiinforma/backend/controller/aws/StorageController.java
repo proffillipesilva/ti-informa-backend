@@ -17,11 +17,11 @@ public class StorageController {
 
     @PostMapping("/upload")
     public ResponseEntity uploadFile(@RequestParam(value = "file") MultipartFile file) {
+        storageService.uploadFile(file);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("File successfully uploaded");
 
-        return new ResponseEntity<>(
-                storageService.uploadFile(file),
-                HttpStatus.OK
-        );
     }
 
     @GetMapping("/download/{fileName}")
