@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.controller;
+package br.com.tiinforma.backend.controller.auth;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
@@ -10,7 +10,6 @@ import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
-import br.com.tiinforma.backend.security.OAuth2AuthenticationSuccessHandler;
 import br.com.tiinforma.backend.security.jwt.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
