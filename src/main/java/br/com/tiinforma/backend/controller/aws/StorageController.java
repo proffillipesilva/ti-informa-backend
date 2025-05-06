@@ -1,4 +1,4 @@
-/*package br.com.tiinforma.backend.controller.aws;
+package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.services.aws.StorageService;
@@ -86,4 +86,3 @@ public class StorageController {
         }
     }
 }
-*/

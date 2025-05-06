@@ -1,4 +1,4 @@
-/*package br.com.tiinforma.backend.services.aws;
+package br.com.tiinforma.backend.services.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.video.Video;
@@ -86,5 +86,3 @@ public class StorageService  {
     }
 
 }
-*/
-

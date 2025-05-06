@@ -1,4 +1,4 @@
-/*package br.com.tiinforma.backend.config.aws;
+package br.com.tiinforma.backend.config.aws;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -30,4 +30,3 @@ public class StorageConfig {
                 .withRegion(awsRegion).build();
     }
 }
-*/
