@@ -1,4 +1,4 @@
-package br.com.tiinforma.backend.services.implementations;
+/*package br.com.tiinforma.backend.services.implementations;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.video.Video;
@@ -38,3 +38,4 @@ public class VideoImpl implements VideoService {
         }
     }
 }
+*/
