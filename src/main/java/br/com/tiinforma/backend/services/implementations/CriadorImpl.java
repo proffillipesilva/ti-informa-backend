@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,11 +66,4 @@ public class CriadorImpl implements CriadorService {
                 .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado: " + id));
         criadorRepository.delete(criador);
     }
-
-    @Override
-    public Criador buscarPorEmail(String email) {
-        Optional<Criador> criadorOptional = criadorRepository.findByEmail(email);
-        return criadorOptional.orElseThrow(() -> new ResourceNotFoundException("Nenhum criador encontrado: " + email));
-    }
-
 }

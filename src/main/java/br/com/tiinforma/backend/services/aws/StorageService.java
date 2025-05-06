@@ -1,8 +1,5 @@
 package br.com.tiinforma.backend.services.aws;
 
-import br.com.tiinforma.backend.domain.criador.Criador;
-import br.com.tiinforma.backend.domain.video.Video;
-import br.com.tiinforma.backend.repositories.VideoRepository;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -19,9 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-
 
 @Service
 @Slf4j
@@ -33,27 +27,12 @@ public class StorageService  {
     @Autowired
     private AmazonS3 s3Client;
 
-    @Autowired
-    private VideoRepository videoRepository;
-
-    public String uploadFile(MultipartFile file, String titulo, String descricao, String categoria, List<String> palavraChave, Criador criador) {
+    public String uploadFile(MultipartFile file) {
         File fileObj = convertMultiPartFileToFile(file);
-        String fileNameOnS3 = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        s3Client.putObject(new PutObjectRequest(bucketName, fileNameOnS3, fileObj));
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        s3Client.putObject(new PutObjectRequest(bucketName,fileName ,fileObj));
         fileObj.delete();
-
-        Video video = Video.builder()
-                .titulo(titulo)
-                .descricao(descricao)
-                .url(fileNameOnS3)
-                .dataPublicacao(LocalDate.now())
-                .categoria(categoria)
-                .palavraChave(palavraChave)
-                .criador(criador)
-                .build();
-        videoRepository.save(video);
-
-        return "File uploaded successfully. S3 key: " + fileNameOnS3 + ", Video ID: " + video.getId();
+        return "File uploaded " + fileName;
     }
 
     public byte[] downloadFile(String fileName) {

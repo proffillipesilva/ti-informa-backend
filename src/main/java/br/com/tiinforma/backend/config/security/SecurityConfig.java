@@ -39,8 +39,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/usuario").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/criador").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/file/upload").hasRole("CRIADOR") // Apenas CRIADORES podem fazer upload
-                        .requestMatchers(HttpMethod.DELETE, "/file/delete/**").hasRole("CRIADOR") // Apenas CRIADORES podem tentar deletar
                         .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
                         .requestMatchers(
                                 "/swagger-ui-custom.html",
@@ -52,10 +50,10 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/google")  // Personaliza a URL de login
-                        .successHandler(oAuth2AuthenticationSuccessHandler)  // Handler após o sucesso
-                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/oauth2/authorization/google")  // Personaliza a URL de login
+//                        .successHandler(oAuth2AuthenticationSuccessHandler)  // Handler após o sucesso
+//                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
