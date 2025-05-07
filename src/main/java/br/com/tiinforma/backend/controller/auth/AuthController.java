@@ -46,8 +46,6 @@ public class AuthController {
                 loginRequest.getEmail(), loginRequest.getSenha()
         );
 
-
-
         var auth = this.authenticationManager.authenticate(usernameSenha);
         var principal = auth.getPrincipal();
 
@@ -156,7 +154,6 @@ public class AuthController {
 
         criador.setSenha(new BCryptPasswordEncoder().encode(criadorDto.getSenha()));
         criador.setCpf(criadorDto.getCpf());
-        criador.setRg(criadorDto.getRg());
         criador.setFormacao(criadorDto.getFormacao());
 
         criadorRepository.save(criador);

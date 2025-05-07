@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             System.out.println("EMAIL do TOKEN: " + email);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails usuario = usuarioRepository.findByEmail(email)
+                UserDetailsImpl usuario = usuarioRepository.findByEmail(email)
                         .map(UserDetailsImpl::new) // Converte Usuario para UserDetailsImpl
                         .orElseGet(() -> criadorRepository.findByEmail(email)
                                 .map(UserDetailsImpl::new) // Converte Criador para UserDetailsImpl

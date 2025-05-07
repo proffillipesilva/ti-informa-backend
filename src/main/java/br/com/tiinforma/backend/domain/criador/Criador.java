@@ -32,9 +32,6 @@ public class Criador implements Serializable {
     @Column(unique = true)
     private String cpf;
 
-    @Column(unique = true)
-    private String rg;
-
     private String senha;
 
     private String formacao;

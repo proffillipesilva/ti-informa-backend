@@ -29,17 +29,17 @@ public class Video implements Serializable {
 
     private String titulo;
 
-    private String descricao;
+    @Column(name = "video_key")
+    private String key;
 
-    @Column(unique = true)
-    private String url;
+    private String descricao;
 
     private LocalDate dataPublicacao = LocalDate.now();
 
     private String categoria;
 
     @ElementCollection
-    private List <String> palavraChave;
+    private List<String> palavraChave;
 
     @ManyToOne
     @JoinColumn(name = "id_criador")

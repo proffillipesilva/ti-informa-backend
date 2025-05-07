@@ -36,12 +36,14 @@ public class UserDetailsImpl implements UserDetails {
 
 
     public UserDetailsImpl(Usuario usuario) {
+        this.id = usuario.getId();
         this.email = usuario.getEmail();
         this.senha = usuario.getSenha();
         this.funcao = usuario.getFuncao(); // ROLE_USER
     }
 
     public UserDetailsImpl(Criador criador) {
+        this.id = criador.getId();
         this.email = criador.getEmail();
         this.senha = criador.getSenha();
         this.funcao = criador.getFuncao(); // ROLE_CRIADOR

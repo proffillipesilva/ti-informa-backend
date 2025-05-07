@@ -1,56 +1,61 @@
 package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
+import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
+import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.services.auth.AuthUtils;
 import br.com.tiinforma.backend.services.aws.StorageService;
-import br.com.tiinforma.backend.services.interfaces.CriadorService;
-import br.com.tiinforma.backend.services.interfaces.VideoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/file")
 public class StorageController {
 
+    private static final Logger log = LoggerFactory.getLogger(StorageController.class);
+
     @Autowired
     private StorageService storageService;
 
     @Autowired
-    private CriadorService criadorService;
-
-    @Autowired
-    private VideoService videoService;
+    private CriadorRepository criadorRepository;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadVideo(
-            @RequestPart("file") MultipartFile file,
-            @RequestParam("titulo") String titulo,
-            @RequestParam("descricao") String descricao,
-            @RequestParam("categoria") String categoria,
-            @RequestParam(value = "palavraChave", required = false) List<String> palavraChave
+    public ResponseEntity<String> uploadFile(
+            @ModelAttribute VideoUploadDTO dto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            Criador criador = criadorService.buscarPorEmail(userDetails.getUsername());
-            if (criador != null) {
-                String uploadResult = storageService.uploadFile(file, titulo, descricao, categoria, palavraChave, criador);
-                return ResponseEntity.status(HttpStatus.CREATED).body(uploadResult);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Criador não encontrado.");
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado.");
-        }
+        Long idCriador = userDetails.getId();
+
+        Criador criador = criadorRepository.findById(idCriador)
+                .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"));
+
+        String response = storageService.uploadFile(
+                dto.getFile(),
+                dto.getTitulo(),
+                dto.getDescricao(),
+                dto.getCategoria(),
+                dto.getDataCadastro(),
+                dto.getPalavraChave(),
+                criador
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+
+
+
+
+
 
     @GetMapping("/download/{fileName}")
     public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName) {
@@ -64,25 +69,17 @@ public class StorageController {
                 .body(resource);
     }
 
-    @DeleteMapping("/delete/{videoId}")
-    public ResponseEntity<String> deleteVideo(@PathVariable Long videoId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            Criador criadorAutenticado = criadorService.buscarPorEmail(userDetails.getUsername()); // Adapte a busca conforme sua lógica
+    @DeleteMapping("/delete/{fileName}")
+    public ResponseEntity<String> deleteFile(@PathVariable String fileName) {
+        storageService.deleteFile(fileName);
 
-            if (criadorAutenticado != null) {
-                boolean deletado = videoService.deleteVideo(videoId, criadorAutenticado);
-                if (deletado) {
-                    return ResponseEntity.ok("Vídeo deletado com sucesso.");
-                } else {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para deletar este vídeo.");
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Criador não autenticado.");
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não autenticado.");
-        }
+        return new ResponseEntity<>(
+                fileName,
+                HttpStatus.OK
+        );
     }
+
+
+
+
 }

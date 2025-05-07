@@ -12,7 +12,6 @@ import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.repositories.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,7 +82,6 @@ public class DBService {
                         .nome("Lucas FilmMaker")
                         .email("lucas.filmmaker@email.com")
                         .cpf("12345678901")
-                        .rg("SP-1234567")
                         .senha(passwordEncoder.encode("senha123"))
                         .formacao("Cinema e Audiovisual")
                         .funcao(Funcao.CRIADOR)
@@ -92,7 +90,6 @@ public class DBService {
                         .nome("Beatriz MusicPro")
                         .email("beatriz.music@email.com")
                         .cpf("98765432109")
-                        .rg("RJ-7654321")
                         .senha(passwordEncoder.encode("senha456"))
                         .formacao("Produção Musical")
                         .funcao(Funcao.CRIADOR)
@@ -129,7 +126,6 @@ public class DBService {
                 Video.builder()
                         .titulo("Como Editar Vídeos Profissionais")
                         .descricao("Aprenda técnicas avançadas de edição.")
-                        .url("https://exemplo.com/edicao")
                         .dataPublicacao(LocalDate.now())
                         .categoria("Cinema")
                         .palavraChave(List.of("edição", "cinema"))
@@ -138,7 +134,6 @@ public class DBService {
                 Video.builder()
                         .titulo("Teoria Musical Básica")
                         .descricao("Introdução à teoria musical.")
-                        .url("https://exemplo.com/musica")
                         .categoria("Música")
                         .palavraChave(List.of("música", "teoria"))
                         .criador(criadores.get(1)) // Beatriz MusicPro
