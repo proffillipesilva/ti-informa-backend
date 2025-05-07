@@ -1,10 +1,12 @@
 package br.com.tiinforma.backend.services.aws;
 
+import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.video.Video;
+import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.repositories.VideoRepository;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -27,13 +31,45 @@ public class StorageService  {
     @Autowired
     private AmazonS3 s3Client;
 
-    public String uploadFile(MultipartFile file) {
+    @Autowired
+    private VideoRepository videoRepository;
+
+    @Autowired
+    private CriadorRepository criadorRepository;
+
+
+    public String uploadFile(
+            MultipartFile file,
+            String titulo,
+            String descricao,
+            String categoria,
+            LocalDate dataPublicacao,
+            List<String> palavraChave,
+            Criador criador
+    ) {
         File fileObj = convertMultiPartFileToFile(file);
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        s3Client.putObject(new PutObjectRequest(bucketName,fileName ,fileObj));
+
+        s3Client.putObject(new PutObjectRequest(bucketName, fileName, fileObj));
         fileObj.delete();
-        return "File uploaded " + fileName;
+
+        Video video = Video.builder()
+                .titulo(titulo)
+                .descricao(descricao)
+                .categoria(categoria)
+                .palavraChave(palavraChave)
+                .dataPublicacao(dataPublicacao != null ? dataPublicacao : LocalDate.now())
+                .key(fileName)
+                .criador(criador)
+                .build();
+
+        videoRepository.save(video);
+
+        return "File uploaded and video saved with key: " + fileName;
     }
+
+
+
 
     public byte[] downloadFile(String fileName) {
         S3Object s3Object = s3Client.getObject(bucketName,fileName);
@@ -46,6 +82,7 @@ public class StorageService  {
         }
         return null;
     }
+
 
     public String deleteFile(String fileName) {
         s3Client.deleteObject(bucketName,fileName);

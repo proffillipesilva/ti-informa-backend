@@ -45,8 +45,6 @@ public class AuthController {
                 loginRequest.getEmail(), loginRequest.getSenha()
         );
 
-
-
         var auth = this.authenticationManager.authenticate(usernameSenha);
         var principal = auth.getPrincipal();
 

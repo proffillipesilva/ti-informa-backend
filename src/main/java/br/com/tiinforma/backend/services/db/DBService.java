@@ -12,7 +12,6 @@ import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.repositories.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -129,7 +128,6 @@ public class DBService {
                 Video.builder()
                         .titulo("Como Editar Vídeos Profissionais")
                         .descricao("Aprenda técnicas avançadas de edição.")
-                        .url("https://exemplo.com/edicao")
                         .dataPublicacao(LocalDate.now())
                         .categoria("Cinema")
                         .palavraChave(List.of("edição", "cinema"))
@@ -138,7 +136,6 @@ public class DBService {
                 Video.builder()
                         .titulo("Teoria Musical Básica")
                         .descricao("Introdução à teoria musical.")
-                        .url("https://exemplo.com/musica")
                         .categoria("Música")
                         .palavraChave(List.of("música", "teoria"))
                         .criador(criadores.get(1)) // Beatriz MusicPro
