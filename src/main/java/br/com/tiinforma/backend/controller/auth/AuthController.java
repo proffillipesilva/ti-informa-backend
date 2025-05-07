@@ -153,7 +153,6 @@ public class AuthController {
 
         criador.setSenha(new BCryptPasswordEncoder().encode(criadorDto.getSenha()));
         criador.setCpf(criadorDto.getCpf());
-        criador.setRg(criadorDto.getRg());
         criador.setFormacao(criadorDto.getFormacao());
 
         criadorRepository.save(criador);

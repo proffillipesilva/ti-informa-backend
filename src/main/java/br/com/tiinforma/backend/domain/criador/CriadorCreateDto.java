@@ -24,9 +24,6 @@ public class CriadorCreateDto {
         @Pattern(regexp = "\\d{11}")
         private String cpf;
 
-        @Pattern(regexp = "\\d{8,20}")
-        private String rg;
-
         @Size(min = 8, message = "A senha deve conter no mínimo 8 caracteres")
         @Pattern(
                 regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).*$",

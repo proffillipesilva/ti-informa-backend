@@ -51,7 +51,6 @@ public class CriadorImpl implements CriadorService {
         criador.setNome(criadorCreateDto.getNome());
         criador.setEmail(criadorCreateDto.getEmail());
         criador.setCpf(criador.getCpf());
-        criador.setRg(criador.getRg());
         criador.setSenha(criadorCreateDto.getSenha());
         criador.setFormacao(criadorCreateDto.getFormacao());
 
