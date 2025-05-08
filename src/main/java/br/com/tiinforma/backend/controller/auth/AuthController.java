@@ -49,7 +49,7 @@ public class AuthController {
         var principal = auth.getPrincipal();
 
         if (principal instanceof UserDetailsImpl userDetails) {
-            String token = tokenService.gerarToken(userDetails); // Agora está correto
+            String token = tokenService.gerarToken(userDetails);
 
             return ResponseEntity.ok(new LoginResponseDto(token));
         }

@@ -12,8 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -84,10 +86,23 @@ public class StorageService  {
     }
 
 
-    public String deleteFile(String fileName) {
-        s3Client.deleteObject(bucketName,fileName);
-        return "File deleted " + fileName;
+    public String deleteFile(String fileName, String username) {
+        Video video = videoRepository.findByKey(fileName);
+
+        if (video == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vídeo não encontrado");
+        }
+
+        if (!video.getCriador().getEmail().equals(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para excluir este vídeo");
+        }
+
+        s3Client.deleteObject(bucketName, fileName);
+        videoRepository.delete(video);
+
+        return "Vídeo excluído: " + fileName;
     }
+
 
 
     private File convertMultiPartFileToFile(MultipartFile file){
