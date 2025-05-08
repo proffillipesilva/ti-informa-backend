@@ -14,6 +14,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -51,12 +52,6 @@ public class StorageController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
-
-
-
-
-
     @GetMapping("/download/{fileName}")
     public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName) {
         byte[] data = storageService.downloadFile(fileName);
@@ -70,14 +65,14 @@ public class StorageController {
     }
 
     @DeleteMapping("/delete/{fileName}")
-    public ResponseEntity<String> deleteFile(@PathVariable String fileName) {
-        storageService.deleteFile(fileName);
-
-        return new ResponseEntity<>(
-                fileName,
-                HttpStatus.OK
-        );
+    public ResponseEntity<String> deleteFile(
+            @PathVariable String fileName,
+            @AuthenticationPrincipal User userDetails
+    ) {
+        String mensagem = storageService.deleteFile("Arquivo:" + fileName,"Deletado pelo usuario:" + userDetails.getUsername());
+        return ResponseEntity.ok(mensagem);
     }
+
 
 
 
