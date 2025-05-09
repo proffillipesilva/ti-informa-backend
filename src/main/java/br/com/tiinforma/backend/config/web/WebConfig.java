@@ -27,15 +27,17 @@ public class WebConfig implements WebMvcConfigurer {
                 .ignoreAcceptHeader(false)
                 .useRegisteredExtensionsOnly(false)
                 .defaultContentType(MediaType.APPLICATION_JSON)
-                    .mediaType("json", MediaType.APPLICATION_JSON)
-                    .mediaType("xml", MediaType.APPLICATION_XML)
-                    .mediaType("yml", MEDIA_TYPE_APPLICATION_YML));
+                .mediaType("json", MediaType.APPLICATION_JSON)
+                .mediaType("xml", MediaType.APPLICATION_XML)
+                .mediaType("yml", MEDIA_TYPE_APPLICATION_YML));
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE");
+                .allowedOrigins("http://localhost:3000", "https://accounts.google.com")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
