@@ -22,7 +22,7 @@ public class Criador implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id_criador;
 
     private String nome;
 

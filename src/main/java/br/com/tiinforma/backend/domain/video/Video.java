@@ -25,7 +25,7 @@ public class Video implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id_video;
 
     private String titulo;
 
