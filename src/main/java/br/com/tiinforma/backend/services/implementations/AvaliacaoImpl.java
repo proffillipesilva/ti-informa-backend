@@ -42,7 +42,6 @@ public class AvaliacaoImpl implements AvaliacaoService {
     public AvaliacaoResponseDto create(AvaliacaoCreateDto avaliacaoCreateDto) {
         var avaliacao = avaliacaoRepository.findById(avaliacaoCreateDto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + avaliacaoCreateDto.getUserId()));
-        avaliacao.setId(avaliacao.getId());
         avaliacao.setNota(avaliacaoCreateDto.getNota());
         avaliacao.setComentario(avaliacaoCreateDto.getComentario());
 
