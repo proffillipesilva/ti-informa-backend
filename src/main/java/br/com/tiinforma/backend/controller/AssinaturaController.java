@@ -1,10 +1,13 @@
 package br.com.tiinforma.backend.controller;
 
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaCreateDto;
+import br.com.tiinforma.backend.domain.assinatura.AssinaturaModel;
+import br.com.tiinforma.backend.domain.assinatura.AssinaturaModelAssembler;
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
-import br.com.tiinforma.backend.services.implementations.AssinaturaImpl;
+import br.com.tiinforma.backend.services.interfaces.AssinaturaService;
 import br.com.tiinforma.backend.util.MediaType;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,50 +16,45 @@ import java.util.List;
 @RestController
 @RequestMapping("/assinaturas")
 @CrossOrigin(origins = "http://localhost:8080")
-@RequiredArgsConstructor
 public class AssinaturaController {
 
-    private final AssinaturaImpl assinaturaService;
+    @Autowired
+    private AssinaturaService assinaturaService;
 
-    @GetMapping(
-            value = "/{id}",
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
-    )
-    public ResponseEntity<AssinaturaResponseDto> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(assinaturaService.findById(id));
+    @Autowired
+    private AssinaturaModelAssembler assinaturaModelAssembler;
+
+    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    public ResponseEntity<AssinaturaModel> findById(@PathVariable Long id) {
+        AssinaturaResponseDto dto = assinaturaService.findById(id);
+        AssinaturaModel model = assinaturaModelAssembler.toModel(dto);
+        return ResponseEntity.ok(model);
     }
 
-    @GetMapping(
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
-    )
-    public ResponseEntity<List<AssinaturaResponseDto>> findAll() {
-        return ResponseEntity.ok(assinaturaService.findAll());
+    @GetMapping(produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    public ResponseEntity<CollectionModel<AssinaturaModel>> findAll() {
+        List<AssinaturaResponseDto> dtos = assinaturaService.findAll();
+        List<AssinaturaModel> models = dtos.stream()
+                .map(assinaturaModelAssembler::toModel)
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(models));
     }
 
-    @PostMapping(
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
-            consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
-    )
-    public ResponseEntity<AssinaturaResponseDto> create(@RequestBody AssinaturaCreateDto assinaturaCreateDto) {
-        AssinaturaResponseDto created = assinaturaService.create(assinaturaCreateDto);
-        return ResponseEntity.status(201).body(created);
+    @PostMapping(value = "/register", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}, consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    public ResponseEntity<AssinaturaModel> create(@RequestBody AssinaturaCreateDto dto) {
+        AssinaturaResponseDto created = assinaturaService.create(dto);
+        AssinaturaModel model = assinaturaModelAssembler.toModel(created);
+        return ResponseEntity.status(201).body(model);
     }
 
-    @PutMapping(
-            value = "/{id}",
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
-            consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
-    )
-    public ResponseEntity<AssinaturaCreateDto> update(@PathVariable Long id, @RequestBody AssinaturaCreateDto assinaturaCreateDto) {
-        assinaturaCreateDto.setUserId(id);
-        AssinaturaCreateDto updated = assinaturaService.update(assinaturaCreateDto);
-        return ResponseEntity.ok(updated);
+    @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}, consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    public ResponseEntity<AssinaturaModel> update(@PathVariable Long id, @RequestBody AssinaturaCreateDto dto) {
+        AssinaturaResponseDto updated = assinaturaService.update(id, dto);
+        AssinaturaModel model = assinaturaModelAssembler.toModel(updated);
+        return ResponseEntity.ok(model);
     }
 
-    @DeleteMapping(
-            value = "/{id}",
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}
-    )
+    @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         assinaturaService.delete(id);
         return ResponseEntity.noContent().build();
