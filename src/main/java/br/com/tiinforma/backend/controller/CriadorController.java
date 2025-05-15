@@ -2,6 +2,7 @@ package br.com.tiinforma.backend.controller;
 
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
+import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.interfaces.CriadorService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,4 +44,17 @@ public class CriadorController {
     public void delete(@PathVariable Long id) {
         criadorService.delete(id);
     }
+
+    @Autowired
+    private VideoRepository videoRepository;
+    @GetMapping("/{id}/videos")
+
+    public ResponseEntity<?> listarVideosDoCriador(@PathVariable Long id) {
+        var videos = videoRepository.findByCriadorId(id);
+        return ResponseEntity.ok(videos);
+    }
+
+
 }
+
+
