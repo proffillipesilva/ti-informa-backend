@@ -1,10 +1,13 @@
 package br.com.tiinforma.backend.controller;
 
 import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoCreateDto;
+import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoModel;
+import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoModelAssembler;
 import br.com.tiinforma.backend.domain.avaliacao.AvaliacaoResponseDto;
 import br.com.tiinforma.backend.services.interfaces.AvaliacaoService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,28 +21,41 @@ public class AvaliacaoController {
     @Autowired
     private AvaliacaoService avaliacaoService;
 
+    @Autowired
+    private AvaliacaoModelAssembler avaliacaoModelAssembler;
+
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
-    public ResponseEntity<AvaliacaoResponseDto> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(avaliacaoService.findById(id));
+    public ResponseEntity<AvaliacaoModel> findById(@PathVariable Long id) {
+        AvaliacaoResponseDto dto = avaliacaoService.findById(id);
+        AvaliacaoModel model = avaliacaoModelAssembler.toModel(dto);
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
-    public ResponseEntity<List<AvaliacaoResponseDto>> findAll() {
-        return ResponseEntity.ok(avaliacaoService.findAll());
+    public ResponseEntity<CollectionModel<AvaliacaoModel>> findAll() {
+        List<AvaliacaoResponseDto> avaliacaoList = avaliacaoService.findAll();
+        List<AvaliacaoModel> models = avaliacaoList.stream()
+                .map(avaliacaoModelAssembler::toModel)
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(models));
     }
 
     @PostMapping(value = "/create", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
             consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
-    public AvaliacaoResponseDto create(@RequestBody AvaliacaoCreateDto avaliacaoCreateDto) {
-        return avaliacaoService.create(avaliacaoCreateDto);
+    public ResponseEntity<AvaliacaoModel> create(@RequestBody AvaliacaoCreateDto avaliacaoCreateDto) {
+        AvaliacaoResponseDto created = avaliacaoService.create(avaliacaoCreateDto);
+        AvaliacaoModel model = avaliacaoModelAssembler.toModel(created);
+        return ResponseEntity.ok(model);
     }
 
     @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"},
             consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
-    public ResponseEntity<AvaliacaoCreateDto> update(@PathVariable Long id, @RequestBody AvaliacaoCreateDto dto) {
+    public ResponseEntity<AvaliacaoModel> update(@PathVariable Long id, @RequestBody AvaliacaoCreateDto dto) {
         dto.setUserId(id);
         AvaliacaoCreateDto atualizado = avaliacaoService.update(dto);
-        return ResponseEntity.ok(atualizado);
+        AvaliacaoResponseDto updatedDto = avaliacaoService.findById(id); // Para manter consistência com HATEOAS
+        AvaliacaoModel model = avaliacaoModelAssembler.toModel(updatedDto);
+        return ResponseEntity.ok(model);
     }
 
     @DeleteMapping("/{id}")
