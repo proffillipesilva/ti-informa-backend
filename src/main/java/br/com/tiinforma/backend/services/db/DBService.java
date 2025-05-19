@@ -15,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DBService {
@@ -54,21 +57,48 @@ public class DBService {
         }
     }
 
+    @Transactional
+    public Video salvarVideo(
+            String titulo,
+            String descricao,
+            String categoria,
+            String palavraChaveString,
+            String videoKey,
+            Criador criador
+    ) {
+        List<String> palavrasChaveList = null;
+        if (palavraChaveString != null && !palavraChaveString.trim().isEmpty()) {
+            palavrasChaveList = Arrays.stream(palavraChaveString.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+        }
 
+        Video video = Video.builder()
+                .titulo(titulo)
+                .descricao(descricao)
+                .categoria(categoria)
+                .palavra_chave(palavrasChaveList != null ? String.join(",", palavrasChaveList) : null)
+                .dataPublicacao(LocalDate.now())
+                .key(videoKey)
+                .criador(criador)
+                .build();
+
+        return videoRepository.save(video);
+    }
 
     private void criarUsuarios() {
         List<Usuario> usuarios = List.of(
                 Usuario.builder()
                         .nome("Ana Silva")
                         .email("ana.silva@email.com")
-                        .senha(passwordEncoder.encode("senha123")) // Criptografando senha
+                        .senha(passwordEncoder.encode("senha123"))
                         .interesses("Rock, Jazz")
                         .funcao(Funcao.USUARIO)
                         .build(),
                 Usuario.builder()
                         .nome("Carlos Oliveira")
                         .email("carlos.oliveira@email.com")
-                        .senha(passwordEncoder.encode("senha456")) // Criptografando senha
+                        .senha(passwordEncoder.encode("senha456"))
                         .interesses("Eletrônica, Techno")
                         .funcao(Funcao.USUARIO)
                         .build()
@@ -128,15 +158,17 @@ public class DBService {
                         .descricao("Aprenda técnicas avançadas de edição.")
                         .dataPublicacao(LocalDate.now())
                         .categoria("Cinema")
-                        .palavraChave(List.of("edição", "cinema"))
-                        .criador(criadores.get(0)) // Lucas FilmMaker
+                        .palavra_chave("edição,cinema")
+                        .key("video123.mp4")
+                        .criador(criadores.get(0))
                         .build(),
                 Video.builder()
                         .titulo("Teoria Musical Básica")
                         .descricao("Introdução à teoria musical.")
                         .categoria("Música")
-                        .palavraChave(List.of("música", "teoria"))
-                        .criador(criadores.get(1)) // Beatriz MusicPro
+                        .palavra_chave("música,teoria")
+                        .key("music456.mp4")
+                        .criador(criadores.get(1))
                         .build()
         );
         videoRepository.saveAll(videos);

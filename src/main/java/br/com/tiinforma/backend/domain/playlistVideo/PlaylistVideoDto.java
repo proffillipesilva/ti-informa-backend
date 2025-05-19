@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlaylistVideoDto {
-    private Long id;
     private Long idVideo;
     private String videoTitulo;
+    private String videoKey;
     private Integer posicaoVideo;
 }

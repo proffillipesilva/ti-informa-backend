@@ -36,6 +36,9 @@ public class Usuario implements Serializable {
 
     private String interesses;
 
+    @Column(length = 100)
+    private String pergunta_resposta;
+
     private Funcao funcao = Funcao.USUARIO;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)

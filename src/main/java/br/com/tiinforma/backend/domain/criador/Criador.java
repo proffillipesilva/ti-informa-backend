@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.domain.criador;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
 import br.com.tiinforma.backend.domain.video.Video;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,10 +40,12 @@ public class Criador implements Serializable {
     private Funcao funcao = Funcao.CRIADOR;
 
     @OneToMany(mappedBy = "criador")
+    @JsonManagedReference
     @Builder.Default
     private List<Playlist> playlists= new ArrayList<>();
 
     @OneToMany(mappedBy = "criador")
+    @JsonManagedReference
     @Builder.Default
     private List<Video> videos= new ArrayList<>();
 

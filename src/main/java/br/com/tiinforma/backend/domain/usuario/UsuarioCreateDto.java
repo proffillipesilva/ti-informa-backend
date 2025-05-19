@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.usuario;
 
+import br.com.tiinforma.backend.domain.PerguntaResposta.PerguntaRespostaDto;
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
 import br.com.tiinforma.backend.domain.playlist.PlaylistDto;
 import jakarta.validation.constraints.Pattern;
@@ -29,4 +30,5 @@ public class UsuarioCreateDto {
     private String interesses;
     private List<PlaylistDto> playlistDtos;
     private List<AssinaturaResponseDto> assinaturaDtos;
+    private List<PerguntaRespostaDto> pergunta_resposta;
 }

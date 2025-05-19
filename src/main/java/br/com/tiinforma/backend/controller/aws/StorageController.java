@@ -2,11 +2,14 @@ package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
-import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
+import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
-import br.com.tiinforma.backend.services.auth.AuthUtils;
+import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +17,14 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/file")
@@ -29,27 +38,71 @@ public class StorageController {
     @Autowired
     private CriadorRepository criadorRepository;
 
+    @Autowired
+    private VideoRepository videoRepository;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(
-            @ModelAttribute VideoUploadDTO dto,
+    public ResponseEntity<?> uploadVideo(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("titulo") String titulo,
+            @RequestParam("descricao") String descricao,
+            @RequestParam(value = "categoria", required = false) String categoria,
+            @RequestParam(value = "palavra_chave", required = false) String palavra_chave,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        Long idCriador = userDetails.getId();
+        log.info("Recebida requisição de upload de vídeo para o usuário: {}", userDetails.getUsername());
+        log.info("Título do vídeo: {}", titulo);
+        log.info("Descrição do vídeo: {}", descricao);
+        log.info("Categoria do vídeo: {}", categoria);
+        log.info("JSON de palavras-chave recebido: {}", palavra_chave);
 
-        Criador criador = criadorRepository.findById(idCriador)
-                .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"));
+        List<String> palavraChave = Collections.emptyList();
+        try {
+            if (palavra_chave != null) {
+                palavraChave = objectMapper.readValue(palavra_chave, new TypeReference<List<String>>() {});
+                log.info("Palavras-chave desserializadas: {}", palavraChave);
+            } else {
+                log.info("Nenhuma palavra-chave fornecida.");
+            }
 
-        String response = storageService.uploadFile(
-                dto.getFile(),
-                dto.getTitulo(),
-                dto.getDescricao(),
-                dto.getCategoria(),
-                dto.getDataCadastro(),
-                dto.getPalavraChave(),
-                criador
-        );
+            Criador criador = criadorRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> {
+                        log.error("Criador não encontrado para o email: {}", userDetails.getUsername());
+                        return new RuntimeException("Criador não encontrado");
+                    });
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            log.info("Chamando storageService.uploadFile...");
+            String result = storageService.uploadFile(
+                    file, titulo, descricao, categoria, LocalDate.now(), palavra_chave, criador
+            );
+            log.info("Retorno de storageService.uploadFile: {}", result);
+
+            return ResponseEntity.ok(result);
+
+        } catch (JsonProcessingException e) {
+            log.error("Erro ao processar JSON de palavras-chave: {}", e.getMessage());
+            return ResponseEntity.badRequest().body("Formato inválido para palavras-chave");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Erro inesperado durante o upload: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado ao processar o upload.");
+        }
+    }
+
+    @GetMapping("/meus-videos")
+    @Transactional
+    public ResponseEntity<?> listarMeusVideos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            Criador criador = criadorRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Criador não encontrado"));
+            List<Video> videos = videoRepository.findByCriador(criador);
+            return ResponseEntity.ok(videos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar vídeos");
+        }
     }
 
     @GetMapping("/download/{fileName}")
@@ -67,14 +120,9 @@ public class StorageController {
     @DeleteMapping("/delete/{fileName}")
     public ResponseEntity<String> deleteFile(
             @PathVariable String fileName,
-            @AuthenticationPrincipal User userDetails
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         String mensagem = storageService.deleteFile("Arquivo:" + fileName,"Deletado pelo usuario:" + userDetails.getUsername());
         return ResponseEntity.ok(mensagem);
     }
-
-
-
-
-
 }

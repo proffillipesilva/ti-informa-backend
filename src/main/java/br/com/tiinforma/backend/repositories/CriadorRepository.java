@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface CriadorRepository extends JpaRepository<Criador, Long> {
     Optional<Criador> findByEmail(String email);
+    Optional<Criador> findByCpf(String cpf);
 }

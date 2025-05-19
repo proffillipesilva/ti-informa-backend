@@ -25,7 +25,7 @@ public class Playlist implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id_playlist;
 
     private String nome;
 
