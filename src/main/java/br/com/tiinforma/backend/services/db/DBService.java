@@ -197,13 +197,13 @@ public class DBService {
         List<Playlist> playlists = List.of(
                 Playlist.builder()
                         .nome("Rock Classics")
-                        .visibilidade(Visibilidade.PUBLICO)
+                        .visibilidade(Visibilidade.PUBLICA)
                         .usuario(usuarios.get(0))
                         .criador(criadores.get(0))
                         .build(),
                 Playlist.builder()
                         .nome("Jazz Nights")
-                        .visibilidade(Visibilidade.PRIVADO)
+                        .visibilidade(Visibilidade.PRIVADA)
                         .usuario(usuarios.get(0))
                         .criador(criadores.get(1))
                         .build()
