@@ -2,10 +2,11 @@ package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
+import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
-import br.com.tiinforma.backend.services.auth.AuthUtils;
+import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/file")
@@ -28,6 +31,9 @@ public class StorageController {
 
     @Autowired
     private CriadorRepository criadorRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
@@ -51,6 +57,29 @@ public class StorageController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("foto/{tipo}/{id}")
+    public ResponseEntity<String> uploadFoto(
+            @PathVariable String tipo,
+            @PathVariable Long id,
+            @RequestParam MultipartFile file
+    ){
+        String response;
+
+        switch (tipo.toLowerCase()) {
+            case "criador":
+                response = storageService.uploadFoto(file, id, criadorRepository);
+                break;
+            case "usuario":
+                response = storageService.uploadFoto(file, id, usuarioRepository);
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo inválido");
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 
     @GetMapping("/download/{fileName}")
     public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName) {

@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.domain.criador;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
 import br.com.tiinforma.backend.domain.video.Video;
+import br.com.tiinforma.backend.services.interfaces.FotoAtualizavel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class Criador implements Serializable {
+public class Criador implements Serializable, FotoAtualizavel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -37,6 +38,8 @@ public class Criador implements Serializable {
     private String formacao;
 
     private Funcao funcao = Funcao.CRIADOR;
+
+    private String fotoUrl;
 
     @OneToMany(mappedBy = "criador")
     @Builder.Default
