@@ -3,10 +3,12 @@ package br.com.tiinforma.backend.controller.aws;
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
+import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
+import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,6 +44,9 @@ public class StorageController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private VideoRepository videoRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -102,6 +107,19 @@ public class StorageController {
         } catch (Exception e) {
             log.error("Erro durante o upload do vídeo: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no upload do vídeo: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/meus-videos")
+    @Transactional
+    public ResponseEntity<?> listarMeusVideos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            Criador criador = criadorRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Criador não encontrado"));
+            List<Video> videos = videoRepository.findByCriadorId(criador.getId());
+            return ResponseEntity.ok(videos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar vídeos");
         }
     }
 
