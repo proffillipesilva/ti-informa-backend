@@ -276,8 +276,8 @@ public class AuthController {
                 .build();
         playlistRepository.save(playlist);
         PlaylistDto dto = new PlaylistDto(
-                playlist.getId_playlist(),
-                usuario.getId_usuario(),
+                playlist.getId(),
+                usuario.getId(),
                 playlist.getNome(),
                 playlist.getVisibilidade(),
                 List.of()
@@ -293,12 +293,12 @@ public class AuthController {
         }
         List<Playlist> playlists = playlistRepository.findByUsuario(usuario);
         List<PlaylistDto> dtos = playlists.stream().map(playlist -> new PlaylistDto(
-                playlist.getId_playlist(),
-                usuario.getId_usuario(),
+                playlist.getId(),
+                usuario.getId(),
                 playlist.getNome(),
                 playlist.getVisibilidade(),
                 playlist.getPlaylistVideos().stream().map(pv -> new PlaylistVideoDto(
-                        pv.getVideo().getId_video(),
+                        pv.getVideo().getId(),
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
                         pv.getPosicaoVideo()
@@ -319,7 +319,7 @@ public class AuthController {
         }
         Playlist playlist = playlistOpt.get();
 
-        if (!playlist.getUsuario().getId_usuario().equals(userDetails.getId())) {
+        if (!playlist.getUsuario().getId().equals(userDetails.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para alterar esta playlist");
         }
 
@@ -330,12 +330,12 @@ public class AuthController {
         Video video = videoOpt.get();
 
         boolean jaExiste = playlist.getPlaylistVideos().stream()
-                .anyMatch(pv -> pv.getVideo().getId_video().equals(videoId));
+                .anyMatch(pv -> pv.getVideo().getId().equals(videoId));
         if (jaExiste) {
             return ResponseEntity.badRequest().body("Vídeo já está na playlist");
         }
 
-        PlaylistVideoId playlistVideoId = new PlaylistVideoId(playlist.getId_playlist(), video.getId_video());
+        PlaylistVideoId playlistVideoId = new PlaylistVideoId(playlist.getId(), video.getId());
 
         PlaylistVideo playlistVideo = new PlaylistVideo();
         playlistVideo.setId(playlistVideoId);

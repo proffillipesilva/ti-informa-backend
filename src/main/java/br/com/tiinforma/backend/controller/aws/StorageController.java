@@ -2,10 +2,11 @@ package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
-import br.com.tiinforma.backend.domain.video.Video;
+import br.com.tiinforma.backend.domain.usuario.Usuario;
+import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
-import br.com.tiinforma.backend.repositories.VideoRepository;
+import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,9 +41,10 @@ public class StorageController {
     private CriadorRepository criadorRepository;
 
     @Autowired
-    private VideoRepository videoRepository;
+    private UsuarioRepository usuarioRepository;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadVideo(
@@ -73,37 +76,57 @@ public class StorageController {
                         return new RuntimeException("Criador não encontrado");
                     });
 
-            log.info("Chamando storageService.uploadFile...");
-            String result = storageService.uploadFile(
-                    file, titulo, descricao, categoria, LocalDate.now(), palavra_chave, criador
+            VideoUploadDTO dto = new VideoUploadDTO(
+                    file,
+                    titulo,
+                    descricao,
+                    categoria,
+                    LocalDate.now(),
+                    palavraChave
             );
-            log.info("Retorno de storageService.uploadFile: {}", result);
 
-            return ResponseEntity.ok(result);
+            String response = storageService.uploadFile(
+                    dto.getFile(),
+                    dto.getTitulo(),
+                    dto.getDescricao(),
+                    dto.getCategoria(),
+                    dto.getDataCadastro(),
+                    String.join(",", dto.getPalavraChave()),
+                    criador
+            );
 
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (JsonProcessingException e) {
             log.error("Erro ao processar JSON de palavras-chave: {}", e.getMessage());
-            return ResponseEntity.badRequest().body("Formato inválido para palavras-chave");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao processar palavras-chave: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Erro inesperado durante o upload: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro inesperado ao processar o upload.");
+            log.error("Erro durante o upload do vídeo: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no upload do vídeo: " + e.getMessage());
         }
     }
 
-    @GetMapping("/meus-videos")
-    @Transactional
-    public ResponseEntity<?> listarMeusVideos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        try {
-            Criador criador = criadorRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Criador não encontrado"));
-            List<Video> videos = videoRepository.findByCriador(criador);
-            return ResponseEntity.ok(videos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar vídeos");
+    @PostMapping("foto/{tipo}/{id}")
+    public ResponseEntity<String> uploadFoto(
+            @PathVariable String tipo,
+            @PathVariable Long id,
+            @RequestParam MultipartFile file
+    ){
+        String response;
+
+        switch (tipo.toLowerCase()) {
+            case "criador":
+                response = storageService.uploadFoto(file, id, criadorRepository);
+                break;
+            case "usuario":
+                response = storageService.uploadFoto(file, id, usuarioRepository);
+                break;
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo inválido");
         }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
     @GetMapping("/download/{fileName}")
     public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName) {

@@ -4,6 +4,7 @@ import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
 import br.com.tiinforma.backend.domain.video.Video;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import br.com.tiinforma.backend.services.interfaces.FotoAtualizavel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,12 +19,13 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class Criador implements Serializable {
+public class Criador implements Serializable, FotoAtualizavel {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_criador;
+    @Column(name = "id_criador")
+    private Long id;
 
     private String nome;
 
@@ -38,6 +40,8 @@ public class Criador implements Serializable {
     private String formacao;
 
     private Funcao funcao = Funcao.CRIADOR;
+
+    private String fotoUrl;
 
     @OneToMany(mappedBy = "criador")
     @JsonManagedReference

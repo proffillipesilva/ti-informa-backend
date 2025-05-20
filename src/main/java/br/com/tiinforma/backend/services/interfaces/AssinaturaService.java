@@ -12,7 +12,7 @@ public interface AssinaturaService {
 
     AssinaturaResponseDto create(AssinaturaCreateDto assinaturaCreateDto);
 
-    AssinaturaCreateDto update(AssinaturaCreateDto assinaturaCreateDto);
+    AssinaturaResponseDto update(Long id, AssinaturaCreateDto assinaturaCreateDto);
 
     void delete(Long id);
 }

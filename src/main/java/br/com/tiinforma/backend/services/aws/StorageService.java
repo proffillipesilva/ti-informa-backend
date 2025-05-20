@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.services.aws;
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.repositories.VideoRepository;
+import br.com.tiinforma.backend.services.interfaces.FotoAtualizavel;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -12,6 +13,7 @@ import com.amazonaws.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,6 +127,27 @@ public class StorageService {
         }
     }
 
+    public <T extends FotoAtualizavel> String uploadFoto(
+            MultipartFile file,
+            Long id,
+            JpaRepository<T, Long> repository
+    ){
+        File fileObj = convertMultiPartFileToFile(file);
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+        s3Client.putObject(new PutObjectRequest(bucketName, fileName, fileObj));
+        fileObj.delete();
+
+        String fileUrl = s3Client.getUrl(bucketName, fileName).toString();
+
+        T entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Entidade não encontrada"));
+
+        entity.setFotoUrl(fileUrl);
+        repository.save(entity);
+
+        return "Foto enviada e entidade atualizada com URL: " + fileUrl;
+    }
 
     public byte[] downloadFile(String fileName) {
         S3Object s3Object = s3Client.getObject(bucketName, fileName);

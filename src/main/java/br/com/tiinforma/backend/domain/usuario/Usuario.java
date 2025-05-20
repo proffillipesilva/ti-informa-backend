@@ -4,6 +4,7 @@ import br.com.tiinforma.backend.domain.assinatura.Assinatura;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.usuarioVideoProgresso.UsuarioVideoProgresso;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
+import br.com.tiinforma.backend.services.interfaces.FotoAtualizavel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,14 +19,15 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class Usuario implements Serializable {
+public class Usuario implements Serializable, FotoAtualizavel {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_usuario;
+    @Column(name = "id_usuario")
+    private Long id;
 
     private String nome;
 
@@ -40,6 +42,8 @@ public class Usuario implements Serializable {
     private String pergunta_resposta;
 
     private Funcao funcao = Funcao.USUARIO;
+
+    private String fotoUrl;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default

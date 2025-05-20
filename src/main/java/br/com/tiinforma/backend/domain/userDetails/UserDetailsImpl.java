@@ -33,21 +33,21 @@ public class UserDetailsImpl implements UserDetails {
     private List<Funcao> funcoes;
 
     public UserDetailsImpl(Usuario usuario) {
-        this.id = usuario.getId_usuario();
+        this.id = usuario.getId();
         this.email = usuario.getEmail();
         this.senha = usuario.getSenha();
         this.funcoes = List.of(usuario.getFuncao());
     }
 
     public UserDetailsImpl(Criador criador) {
-        this.id = criador.getId_criador();
+        this.id = criador.getId();
         this.email = criador.getEmail();
         this.senha = criador.getSenha();
         this.funcoes = List.of(criador.getFuncao());
     }
 
     public UserDetailsImpl(Usuario usuario, Criador criador) {
-        this.id = usuario != null ? usuario.getId_usuario() : criador.getId_criador();
+        this.id = usuario != null ? usuario.getId() : criador.getId();
         this.email = usuario != null ? usuario.getEmail() : criador.getEmail();
         this.senha = usuario != null ? usuario.getSenha() : criador.getSenha();
         this.funcoes = new ArrayList<>();

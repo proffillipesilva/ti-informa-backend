@@ -54,18 +54,20 @@ public class AssinaturaImpl implements AssinaturaService {
     }
 
     @Override
-    public AssinaturaCreateDto update(AssinaturaCreateDto assinaturaCreateDto) {
-        var assinatura = assinaturaRepository.findById(assinaturaCreateDto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada"));
+    public AssinaturaResponseDto update(Long id, AssinaturaCreateDto assinaturaCreateDto) {
+        var assinatura = assinaturaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Assinatura não encontrada: " + id));
 
         assinatura.setPlano(Plano.valueOf(assinaturaCreateDto.getPlano().toUpperCase()));
         assinatura.setDataInicio(assinaturaCreateDto.getDataInicio());
         assinatura.setDataFim(assinaturaCreateDto.getDataFim());
         assinatura.setPreco(assinaturaCreateDto.getPreco());
 
-        var assinaturaAtualizada = assinaturaRepository.save(assinatura);
-        return modelMapper.map(assinaturaAtualizada, AssinaturaCreateDto.class);
+        assinaturaRepository.save(assinatura);
+
+        return modelMapper.map(assinatura, AssinaturaResponseDto.class);
     }
+
 
     @Override
     public void delete(Long id) {

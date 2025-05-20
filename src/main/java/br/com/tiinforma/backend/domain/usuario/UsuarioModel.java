@@ -3,18 +3,17 @@ package br.com.tiinforma.backend.domain.usuario;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class UsuarioResponseDto {
+public class UsuarioModel extends RepresentationModel<UsuarioModel> {
+
     private Long id;
     private String nome;
     private String email;
     private String interesses;
     private Funcao funcao;
+
 }

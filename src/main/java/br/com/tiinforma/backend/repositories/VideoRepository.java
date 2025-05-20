@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
     Video findByKey(String key);
-
-    List<Video> findByCriador(Criador criador);
+    List<Video> findByCriadorId(Long criadorId);
 }
