@@ -12,6 +12,8 @@ import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class TokenService {
@@ -21,14 +23,20 @@ public class TokenService {
 
     public String gerarToken(UserDetailsImpl userDetails) {
         SecretKey key = getChaveSecreta();
+
+        List<Map<String, String>> roles = userDetails.getAuthorities().stream()
+                .map(authority -> Map.of("authority", authority.getAuthority()))
+                .toList();
+
         return Jwts.builder()
                 .setIssuer("auth-api")
                 .setSubject(userDetails.getEmail())
-                .claim("role", userDetails.getAuthorities())
+                .claim("role", roles)  // <- Agora em formato correto
                 .setExpiration(gerarDataExpiracao())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
     private Date gerarDataExpiracao() {
         return Date.from(LocalDateTime.now(ZoneOffset.UTC)
                 .plusHours(2)

@@ -79,6 +79,15 @@ public class CriadorImpl implements CriadorService {
             throw new IllegalArgumentException("Já existe um criador com este e-mail");
         }
 
+        if (criadorRepository.findByEmail(usuario.getEmail()).isPresent() ||
+                usuarioRepository.findByEmail(usuario.getEmail())
+                        .filter(u -> !u.getId().equals(usuario.getId()))
+                        .isPresent()) {
+            throw new IllegalArgumentException("Já existe um criador ou outro usuário com este e-mail");
+        }
+
+
+
         if (criadorRepository.findByCpf(cpf).isPresent()) {
             throw new IllegalArgumentException("Já existe um criador com este cpf");
         }

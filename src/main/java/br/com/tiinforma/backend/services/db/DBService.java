@@ -71,6 +71,12 @@ public class DBService {
                         .senha(passwordEncoder.encode("senha456"))
                         .interesses("Eletrônica, Techno")
                         .funcao(Funcao.USUARIO)
+                        .build(),
+                Usuario.builder()
+                        .nome("Samuel Raymundo")
+                        .email("samuel@email.com")
+                        .senha(passwordEncoder.encode("senha1234"))
+                        .funcao(Funcao.ADMINISTRADOR)
                         .build()
         );
 

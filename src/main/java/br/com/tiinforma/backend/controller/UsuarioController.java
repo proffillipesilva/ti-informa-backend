@@ -4,6 +4,8 @@ import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioModel;
 import br.com.tiinforma.backend.domain.usuario.UsuarioModelAssembler;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
+import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorCreateDto;
+import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorResponseDto;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,12 @@ public class UsuarioController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         usuarioService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "registrar/administrador")
+    public ResponseEntity<AdministradorResponseDto> criarAdministrador(@RequestBody AdministradorCreateDto administradorCreateDto) {
+        AdministradorResponseDto administradorResponseDto = usuarioService.criarAdministrador(administradorCreateDto);
+        return ResponseEntity.ok(administradorResponseDto);
     }
 
 }

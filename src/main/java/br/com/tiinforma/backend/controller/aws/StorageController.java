@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -96,11 +97,12 @@ public class StorageController {
     @DeleteMapping("/delete/{fileName}")
     public ResponseEntity<String> deleteFile(
             @PathVariable String fileName,
-            @AuthenticationPrincipal User userDetails
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String mensagem = storageService.deleteFile("Arquivo:" + fileName,"Deletado pelo usuario:" + userDetails.getUsername());
+        String mensagem = storageService.deleteFile(fileName, userDetails.getUsername());
         return ResponseEntity.ok(mensagem);
     }
+
 
 
 

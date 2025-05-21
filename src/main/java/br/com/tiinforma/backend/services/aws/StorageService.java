@@ -1,9 +1,10 @@
 package br.com.tiinforma.backend.services.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.enums.Funcao;
+import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.video.Video;
-import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
-import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.interfaces.FotoAtualizavel;
 import com.amazonaws.services.s3.AmazonS3;
@@ -39,7 +40,7 @@ public class StorageService  {
     private VideoRepository videoRepository;
 
     @Autowired
-    private CriadorRepository criadorRepository;
+    private UsuarioRepository usuarioRepository;
 
 
     public String uploadFile(
@@ -114,7 +115,12 @@ public class StorageService  {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vídeo não encontrado");
         }
 
-        if (!video.getCriador().getEmail().equals(username)) {
+        Usuario usuario = usuarioRepository.findByEmail(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado"));
+
+        boolean isAdmin = usuario.getFuncao() == Funcao.ADMINISTRADOR;
+
+        if (!video.getCriador().getEmail().equals(username) && !isAdmin) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para excluir este vídeo");
         }
 
@@ -123,6 +129,7 @@ public class StorageService  {
 
         return "Vídeo excluído: " + fileName;
     }
+
 
 
 

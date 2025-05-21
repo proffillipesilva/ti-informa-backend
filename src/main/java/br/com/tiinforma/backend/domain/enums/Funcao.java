@@ -8,7 +8,8 @@ import lombok.Getter;
 @Getter
 public enum Funcao {
     USUARIO(0, "USUARIO"),
-    CRIADOR(1, "CRIADOR");
+    CRIADOR(1, "CRIADOR"),
+    ADMINISTRADOR(2, "ADMINISTRADOR");
 
     private Integer codigo;
     private String descricao;
