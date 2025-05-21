@@ -118,8 +118,13 @@ public class StorageController {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Criador não encontrado"));
             List<Video> videos = videoRepository.findByCriadorId(criador.getId());
             return ResponseEntity.ok(videos);
+        } catch (ResponseStatusException e) {
+            System.err.println("ResponseStatusException in listarMeusVideos: " + e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar vídeos");
+            System.err.println("Error in listarMeusVideos: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar vídeos: " + e.getMessage());
         }
     }
 
