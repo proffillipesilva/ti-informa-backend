@@ -3,7 +3,6 @@ package br.com.tiinforma.backend.domain.criador;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -15,21 +14,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CriadorCreateDto {
 
-        @NotBlank
+        @NotBlank(message = "Nome é obrigatório")
         private String nome;
 
-        @Email
+        @NotBlank(message = "Email é obrigatório")
+        @Email(message = "Email inválido")
         private String email;
 
-        @Pattern(regexp = "\\d{11}")
-        private String cpf;
-
-        @Size(min = 8, message = "A senha deve conter no mínimo 8 caracteres")
-        @Pattern(
-                regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#$%^&+=!]).*$",
-                message = "A senha deve ter pelo menos 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial"
-        )
+        @NotBlank(message = "Senha é obrigatória")
         private String senha;
 
+        @NotBlank(message = "CPF é obrigatório")
+        @Pattern(regexp = "\\d{11}", message = "CPF deve conter exatamente 11 dígitos numéricos")
+        private String cpf;
+
+        @NotBlank(message = "Formação é obrigatória")
         private String formacao;
 }

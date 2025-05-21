@@ -134,16 +134,16 @@ public class AuthController {
         return ResponseEntity.ok("Usuário cadastrado com sucesso!");
     }
 
-    @PostMapping("/register/criador")
-    public ResponseEntity<?> registerCriador(@RequestBody @Valid CriadorCreateDto criadorCreateDto) {
 
-        Optional<Criador> criadorExistenteEmail = criadorRepository.findByEmail(criadorCreateDto.getEmail());
-        if (criadorExistenteEmail.isPresent()) {
+
+
+    @PostMapping("register/criador")
+    public ResponseEntity<?> registerCriador(@RequestBody @Valid CriadorCreateDto criadorCreateDto) {
+        if (criadorRepository.findByEmail(criadorCreateDto.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email já cadastrado");
         }
 
-        Optional<Criador> criadorExistenteCpf = criadorRepository.findByCpf(criadorCreateDto.getCpf());
-        if (criadorExistenteCpf.isPresent()) {
+        if (criadorRepository.findByCpf(criadorCreateDto.getCpf()).isPresent()) {
             return ResponseEntity.badRequest().body("CPF já cadastrado");
         }
 
@@ -156,6 +156,8 @@ public class AuthController {
         Criador criador = Criador.builder()
                 .nome(criadorCreateDto.getNome())
                 .email(criadorCreateDto.getEmail())
+                .cpf(criadorCreateDto.getCpf())
+                .formacao(criadorCreateDto.getFormacao())
                 .senha(senhaEncriptada)
                 .cpf(criadorCreateDto.getCpf())
                 .formacao(criadorCreateDto.getFormacao())
@@ -173,6 +175,7 @@ public class AuthController {
 
         return ResponseEntity.ok("Criador cadastrado com sucesso!");
     }
+
 
     @PutMapping("/completar-cadastro/usuario")
     public ResponseEntity<?> completarCadastroUsuario(

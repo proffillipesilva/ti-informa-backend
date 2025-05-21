@@ -28,10 +28,6 @@ public class CriadorController {
         return ResponseEntity.ok(criadorService.findAll());
     }
 
-    @PostMapping(value = "/register", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}, consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
-    public CriadorResponseDto create(@RequestBody CriadorCreateDto criadorCreateDto) {
-        return criadorService.create(criadorCreateDto);
-    }
 
     @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"}, consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
     public ResponseEntity<CriadorResponseDto> update(@PathVariable Long id, @RequestBody CriadorCreateDto dto) {
@@ -43,4 +39,18 @@ public class CriadorController {
     public void delete(@PathVariable Long id) {
         criadorService.delete(id);
     }
+
+    @PostMapping("/{id}/promover")
+    public ResponseEntity<?> promoverUsuarioParaCriador(
+            @PathVariable Long id,
+            @RequestParam String cpf,
+            @RequestParam String formacao) {
+        try {
+            var criadorDto = criadorService.promoverParaCriador(id, cpf, formacao);
+            return ResponseEntity.ok(criadorDto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
