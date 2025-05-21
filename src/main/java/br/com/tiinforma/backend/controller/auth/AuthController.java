@@ -92,11 +92,13 @@ public class AuthController {
 
 
     @PostMapping("register/criador")
-    public ResponseEntity registerCriador(@RequestBody @Valid CriadorCreateDto criadorCreateDto) {
-        Optional<Criador> criadorExistente = criadorRepository.findByEmail(criadorCreateDto.getEmail());
-
-        if (criadorExistente.isPresent()) {
+    public ResponseEntity<?> registerCriador(@RequestBody @Valid CriadorCreateDto criadorCreateDto) {
+        if (criadorRepository.findByEmail(criadorCreateDto.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email já cadastrado");
+        }
+
+        if (criadorRepository.findByCpf(criadorCreateDto.getCpf()).isPresent()) {
+            return ResponseEntity.badRequest().body("CPF já cadastrado");
         }
 
         if (criadorCreateDto.getSenha() == null || criadorCreateDto.getSenha().trim().isEmpty()) {
@@ -104,9 +106,12 @@ public class AuthController {
         }
 
         String senhaEncriptada = new BCryptPasswordEncoder().encode(criadorCreateDto.getSenha());
+
         Criador criador = Criador.builder()
                 .nome(criadorCreateDto.getNome())
                 .email(criadorCreateDto.getEmail())
+                .cpf(criadorCreateDto.getCpf())
+                .formacao(criadorCreateDto.getFormacao())
                 .senha(senhaEncriptada)
                 .funcao(Funcao.CRIADOR)
                 .build();
@@ -115,6 +120,7 @@ public class AuthController {
 
         return ResponseEntity.ok("Criador cadastrado com sucesso!");
     }
+
 
     @PutMapping("/completar-cadastro/usuario")
     public ResponseEntity<?> completarCadastroUsuario(

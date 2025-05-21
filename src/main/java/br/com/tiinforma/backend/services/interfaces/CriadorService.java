@@ -9,9 +9,9 @@ public interface CriadorService {
 
     List<CriadorResponseDto> findAll();
 
-    CriadorResponseDto create(CriadorCreateDto criadorCreateDto);
-
     CriadorResponseDto update(Long id,CriadorCreateDto criadorCreateDto);
 
     void delete(Long id);
+
+    CriadorResponseDto promoverParaCriador(Long id,String cpf, String formacao);
 }

@@ -61,19 +61,25 @@ public class DBService {
                 Usuario.builder()
                         .nome("Ana Silva")
                         .email("ana.silva@email.com")
-                        .senha(passwordEncoder.encode("senha123")) // Criptografando senha
+                        .senha(passwordEncoder.encode("senha123"))
                         .interesses("Rock, Jazz")
                         .funcao(Funcao.USUARIO)
                         .build(),
                 Usuario.builder()
                         .nome("Carlos Oliveira")
                         .email("carlos.oliveira@email.com")
-                        .senha(passwordEncoder.encode("senha456")) // Criptografando senha
+                        .senha(passwordEncoder.encode("senha456"))
                         .interesses("Eletrônica, Techno")
                         .funcao(Funcao.USUARIO)
                         .build()
         );
-        usuarioRepository.saveAll(usuarios);
+
+        for (Usuario u : usuarios) {
+            boolean existeEmail = usuarioRepository.findByEmail(u.getEmail()).isPresent();
+            if (!existeEmail) {
+                usuarioRepository.save(u);
+            }
+        }
     }
 
     private void criarCriadores() {
@@ -95,8 +101,16 @@ public class DBService {
                         .funcao(Funcao.CRIADOR)
                         .build()
         );
-        criadorRepository.saveAll(criadores);
+
+        for (Criador c : criadores) {
+            boolean existeCpf = criadorRepository.findByCpf(c.getCpf()).isPresent();
+            boolean existeEmail = criadorRepository.findByEmail(c.getEmail()).isPresent();
+            if (!existeCpf && !existeEmail) {
+                criadorRepository.save(c);
+            }
+        }
     }
+
 
     private void criarAssinaturas() {
         List<Usuario> usuarios = usuarioRepository.findAll();
