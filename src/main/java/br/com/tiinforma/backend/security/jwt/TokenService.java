@@ -31,29 +31,27 @@ public class TokenService {
         return Jwts.builder()
                 .setIssuer("auth-api")
                 .setSubject(userDetails.getEmail())
-                .claim("role", roles)  // <- Agora em formato correto
+                .claim("roles", roles)  // "roles" é mais comum, mas pode manter "role" se preferir
                 .setExpiration(gerarDataExpiracao())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     private Date gerarDataExpiracao() {
-        return Date.from(LocalDateTime.now(ZoneOffset.UTC)
-                .plusHours(2)
-                .toInstant(ZoneOffset.UTC));
+        return Date.from(
+                LocalDateTime.now(ZoneOffset.UTC)
+                        .plusHours(2)
+                        .toInstant(ZoneOffset.UTC)
+        );
     }
-
 
     public String extrairUsuario(String token) {
         try {
-            String usuario = extrairClaims(token).getSubject();
-            return usuario;
+            return extrairClaims(token).getSubject();
         } catch (Exception e) {
             return null;
         }
     }
-
-
 
     public boolean isTokenExpirado(String token) {
         try {
@@ -64,10 +62,11 @@ public class TokenService {
     }
 
     public String validarToken(String token) {
-        String usuario = extrairUsuario(token);
-        return (usuario != null && !isTokenExpirado(token))
-                ? "Token válido para o usuário: " + usuario
-                : "Token inválido";
+        var usuario = extrairUsuario(token);
+        if (usuario != null && !isTokenExpirado(token)) {
+            return "Token válido para o usuário: " + usuario;
+        }
+        return "Token inválido";
     }
 
     private Claims extrairClaims(String token) {
@@ -78,7 +77,6 @@ public class TokenService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
 
     private SecretKey getChaveSecreta() {
         return Keys.hmacShaKeyFor(secret.getBytes());
