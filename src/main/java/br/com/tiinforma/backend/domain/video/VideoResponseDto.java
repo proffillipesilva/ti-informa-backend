@@ -1,18 +1,23 @@
 package br.com.tiinforma.backend.domain.video;
 
-import br.com.tiinforma.backend.domain.criador.CriadorInfoBasicaDto;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public record VideoResponseDto(
-        Long id,
-        CriadorInfoBasicaDto infoBasicasCriador,
-        String titulo,
-        String descricao,
-        String url,
-        LocalDate dataPublicacao,
-        String categoria,
-        List<String> palavraChave
-) {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class VideoResponseDto{
+    private Long id;
+    private String titulo;
+    private String descricao;
+    private String categoria;
+    private LocalDate dataPublicacao;
+    private List<String> palavraChave;
+    private String key;
 }

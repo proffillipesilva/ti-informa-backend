@@ -5,13 +5,15 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlaylistVideoDto {
-    private Long id;
-    private Long idVideo;
-    private String videoTitulo;
+public class PlaylistVideoResponseDto {
+    private Long videoId;
+    private String titulo;
     private Integer posicaoVideo;
+    private LocalDate dataAdicao;
 }

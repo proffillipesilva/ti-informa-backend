@@ -43,7 +43,7 @@ public class StorageService  {
     private UsuarioRepository usuarioRepository;
 
 
-    public String uploadFile(
+    public Video uploadFile(
             MultipartFile file,
             String titulo,
             String descricao,
@@ -68,10 +68,9 @@ public class StorageService  {
                 .criador(criador)
                 .build();
 
-        videoRepository.save(video);
-
-        return "File uploaded and video saved with key: " + fileName;
+        return videoRepository.save(video);
     }
+
 
     public <T extends FotoAtualizavel> String uploadFoto(
             MultipartFile file,

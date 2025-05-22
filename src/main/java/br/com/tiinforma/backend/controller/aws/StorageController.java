@@ -3,6 +3,8 @@ package br.com.tiinforma.backend.controller.aws;
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
+import br.com.tiinforma.backend.domain.video.Video;
+import br.com.tiinforma.backend.domain.video.VideoResponseDto;
 import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
@@ -37,7 +39,7 @@ public class StorageController {
     private UsuarioRepository usuarioRepository;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(
+    public ResponseEntity<VideoResponseDto> uploadFile(
             @ModelAttribute VideoUploadDTO dto,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
@@ -46,7 +48,7 @@ public class StorageController {
         Criador criador = criadorRepository.findById(idCriador)
                 .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"));
 
-        String response = storageService.uploadFile(
+        Video video = storageService.uploadFile(
                 dto.getFile(),
                 dto.getTitulo(),
                 dto.getDescricao(),
@@ -56,8 +58,18 @@ public class StorageController {
                 criador
         );
 
+        VideoResponseDto response = new VideoResponseDto();
+        response.setId(video.getId());
+        response.setTitulo(video.getTitulo());
+        response.setDescricao(video.getDescricao());
+        response.setCategoria(video.getCategoria());
+        response.setDataPublicacao(video.getDataPublicacao());
+        response.setPalavraChave(video.getPalavraChave());
+        response.setKey(video.getKey());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
     @PostMapping("foto/{tipo}/{id}")
     public ResponseEntity<String> uploadFoto(

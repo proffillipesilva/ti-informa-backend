@@ -1,7 +1,7 @@
 package br.com.tiinforma.backend.domain.usuario;
 
 import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
-import br.com.tiinforma.backend.domain.playlist.PlaylistDto;
+import br.com.tiinforma.backend.domain.playlist.PlaylistResponseDto;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -27,6 +27,6 @@ public class UsuarioCreateDto {
     )
     private String senha;
     private String interesses;
-    private List<PlaylistDto> playlistDtos;
+    private List<PlaylistResponseDto> playlistDtos;
     private List<AssinaturaResponseDto> assinaturaDtos;
 }

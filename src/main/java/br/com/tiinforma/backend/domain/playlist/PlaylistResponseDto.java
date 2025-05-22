@@ -1,7 +1,6 @@
 package br.com.tiinforma.backend.domain.playlist;
 
-import br.com.tiinforma.backend.domain.playlistVideo.PlaylistVideoDto;
-import br.com.tiinforma.backend.domain.enums.Visibilidade;
+import br.com.tiinforma.backend.domain.playlistVideo.PlaylistVideoResponseDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -13,10 +12,11 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlaylistDto {
+public class PlaylistResponseDto {
     private Long id;
-    private Long idUsuario;
     private String nome;
-    private Visibilidade visibilidade;
-    private List<PlaylistVideoDto> videos;
+    private String visibilidade;
+    private Long usuarioId;
+    private String nomeCriador;
+    private List<PlaylistVideoResponseDto> videos;
 }
