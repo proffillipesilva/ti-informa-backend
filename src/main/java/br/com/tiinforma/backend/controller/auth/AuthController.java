@@ -15,6 +15,7 @@ import br.com.tiinforma.backend.domain.playlistVideo.PlaylistVideoResponseDto;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
+import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
 import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.repositories.*;
 import br.com.tiinforma.backend.security.jwt.TokenService;
@@ -93,29 +94,38 @@ public class AuthController {
 
 
     @PostMapping("/register/usuario")
-    public ResponseEntity registerUsuario(@RequestBody @Valid UsuarioCreateDto usuarioCreateDto) {
+    public ResponseEntity<?> registerUsuario(@RequestBody @Valid UsuarioCreateDto usuarioCreateDto) {
         Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(usuarioCreateDto.getEmail());
-
         if (usuarioExistente.isPresent()) {
             return ResponseEntity.badRequest().body("E-mail já cadastrado!");
         }
-
         if (usuarioCreateDto.getSenha() == null || usuarioCreateDto.getSenha().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Senha não pode estar vazia.");
         }
-
         String senhaEncriptada = new BCryptPasswordEncoder().encode(usuarioCreateDto.getSenha());
+        Funcao funcaoUsuario = Funcao.USUARIO;
+        String perguntaRespostaJson = null;
+        if (usuarioCreateDto.getPergunta_resposta() != null && !usuarioCreateDto.getPergunta_resposta().isEmpty()) {
+            try {
+                perguntaRespostaJson = objectMapper.writeValueAsString(usuarioCreateDto.getPergunta_resposta().stream()
+                        .collect(Collectors.toMap(UsuarioResponseDto::getPergunta, UsuarioResponseDto::getResposta)));
+                if (perguntaRespostaJson.length() > 100) {
+                    return ResponseEntity.badRequest().body("A combinação de perguntas e respostas excede o limite de 100 caracteres.");
+                }
+            } catch (Exception e) {
+                return ResponseEntity.internalServerError().body("Erro ao processar as perguntas de segurança.");
+            }
+        }
 
         Usuario usuario = Usuario.builder()
                 .nome(usuarioCreateDto.getNome())
                 .email(usuarioCreateDto.getEmail())
                 .senha(senhaEncriptada)
-                .funcao(Funcao.USUARIO)
+                .funcao(funcaoUsuario)
                 .interesses(usuarioCreateDto.getInteresses())
+                .pergunta_resposta(perguntaRespostaJson)
                 .build();
-
         usuarioRepository.save(usuario);
-
         return ResponseEntity.ok("Usuário cadastrado com sucesso!");
     }
 
