@@ -38,6 +38,9 @@ public class Usuario implements Serializable, FotoAtualizavel {
 
     private String interesses;
 
+    @Column(length = 100)
+    private String pergunta_resposta;
+
     private Funcao funcao = Funcao.USUARIO;
 
     private String fotoUrl;

@@ -3,6 +3,8 @@ package br.com.tiinforma.backend.domain.video;
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.playlistVideo.PlaylistVideo;
 import br.com.tiinforma.backend.domain.usuarioVideoProgresso.UsuarioVideoProgresso;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,6 +27,7 @@ public class Video implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_video")
     private Long id;
 
     private String titulo;
@@ -38,18 +41,21 @@ public class Video implements Serializable {
 
     private String categoria;
 
-    @ElementCollection
-    private List<String> palavraChave;
+    @Column(name = "palavra_chave")
+    private String palavraChave;
 
     @ManyToOne
     @JoinColumn(name = "id_criador")
+    @JsonBackReference
     private Criador criador;
 
     @OneToMany(mappedBy = "video")
     @Builder.Default
+    @JsonIgnore
     private List<PlaylistVideo> playlistVideos = new ArrayList<>();
 
     @OneToMany(mappedBy = "video")
     @Builder.Default
+    @JsonIgnore
     private List<UsuarioVideoProgresso> progressos = new ArrayList<>();
 }

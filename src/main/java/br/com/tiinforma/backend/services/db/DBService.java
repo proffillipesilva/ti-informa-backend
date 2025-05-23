@@ -148,15 +148,17 @@ public class DBService {
                         .descricao("Aprenda técnicas avançadas de edição.")
                         .dataPublicacao(LocalDate.now())
                         .categoria("Cinema")
-                        .palavraChave(List.of("edição", "cinema"))
-                        .criador(criadores.get(0)) // Lucas FilmMaker
+                        .palavraChave("edição,cinema")
+                        .key("video123.mp4")
+                        .criador(criadores.get(0))
                         .build(),
                 Video.builder()
                         .titulo("Teoria Musical Básica")
                         .descricao("Introdução à teoria musical.")
                         .categoria("Música")
-                        .palavraChave(List.of("música", "teoria"))
-                        .criador(criadores.get(1)) // Beatriz MusicPro
+                        .palavraChave("música,teoria")
+                        .key("music456.mp4")
+                        .criador(criadores.get(1))
                         .build()
         );
         videoRepository.saveAll(videos);
@@ -185,13 +187,13 @@ public class DBService {
         List<Playlist> playlists = List.of(
                 Playlist.builder()
                         .nome("Rock Classics")
-                        .visibilidade(Visibilidade.PUBLICO)
+                        .visibilidade(Visibilidade.PUBLICA)
                         .usuario(usuarios.get(0))
                         .criador(criadores.get(0))
                         .build(),
                 Playlist.builder()
                         .nome("Jazz Nights")
-                        .visibilidade(Visibilidade.PRIVADO)
+                        .visibilidade(Visibilidade.PRIVADA)
                         .usuario(usuarios.get(0))
                         .criador(criadores.get(1))
                         .build()

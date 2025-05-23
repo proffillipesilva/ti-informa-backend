@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class PlaylistVideoResponseDto {
     private Long videoId;
     private String titulo;
+    private String key;
     private Integer posicaoVideo;
     private LocalDate dataAdicao;
 }

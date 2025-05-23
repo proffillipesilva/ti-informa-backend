@@ -23,6 +23,7 @@ public class Criador implements Serializable, FotoAtualizavel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_criador")
     private Long id;
 
     private String nome;
