@@ -164,29 +164,25 @@ public class PlaylistController {
     @PostMapping("/{playlistId}/adicionar-video")
     public ResponseEntity<?> adicionarVideoNaPlaylist(
             @PathVariable Long playlistId,
-            @RequestParam Long videoId,  // Recebe o videoId como parâmetro
+            @RequestParam Long videoId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        // Verificar se a playlist existe
         Optional<Playlist> playlistOpt = playlistRepository.findById(playlistId);
         if (playlistOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Playlist não encontrada.");
         }
         Playlist playlist = playlistOpt.get();
 
-        // Verificar se o usuário é o dono da playlist
         if (!playlist.getUsuario().getId().equals(userDetails.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para modificar esta playlist.");
         }
 
-        // Verificar se o vídeo existe
         Optional<Video> videoOpt = videoRepository.findById(videoId);
         if (videoOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vídeo não encontrado.");
         }
         Video video = videoOpt.get();
 
-        // Verificar se o vídeo já está na playlist
         boolean videoJaExiste = playlist.getPlaylistVideos().stream()
                 .anyMatch(pv -> pv.getVideo().getId().equals(videoId));
 
@@ -194,13 +190,11 @@ public class PlaylistController {
             return ResponseEntity.ok("O vídeo já está na playlist.");
         }
 
-        // Determinar a próxima posição disponível
         int proximaPosicao = playlist.getPlaylistVideos().stream()
                 .mapToInt(PlaylistVideo::getPosicaoVideo)
                 .max()
                 .orElse(0) + 1;
 
-        // Criar e salvar a relação PlaylistVideo
         PlaylistVideo playlistVideo = PlaylistVideo.builder()
                 .id(new PlaylistVideoId(playlistId, videoId))
                 .playlist(playlist)
@@ -212,7 +206,6 @@ public class PlaylistController {
         playlistVideoRepository.save(playlistVideo);
         playlist.getPlaylistVideos().add(playlistVideo);
 
-        // Construir a resposta
         PlaylistResponseDto responseDto = new PlaylistResponseDto(
                 playlist.getId(),
                 playlist.getUsuario().getId(),
