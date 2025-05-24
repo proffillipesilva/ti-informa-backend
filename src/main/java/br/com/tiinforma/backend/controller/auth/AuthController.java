@@ -245,7 +245,8 @@ public class AuthController {
                             "nome", usuario.getNome(),
                             "email", usuario.getEmail(),
                             "isCriador", false,
-                            "funcao", usuario.getFuncao().name()
+                            "funcao", usuario.getFuncao().name(),
+                            "interesses", usuario.getInteresses()
                     ));
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
