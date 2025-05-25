@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/usuario").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register/criador").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/recuperar-senha/pergunta").permitAll() 
+                        .requestMatchers(HttpMethod.POST, "/auth/recuperar-senha/verificar-resposta").permitAll() 
                         .requestMatchers(HttpMethod.POST, "/registrar/administrador").hasRole("ADMINISTRADOR")
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api-docs").permitAll()
@@ -63,6 +65,19 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+        @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
