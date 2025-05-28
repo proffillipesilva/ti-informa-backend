@@ -32,6 +32,8 @@ public class Video implements Serializable {
 
     private String titulo;
 
+    private String thumbnail;
+
     @Column(name = "video_key")
     private String key;
 
