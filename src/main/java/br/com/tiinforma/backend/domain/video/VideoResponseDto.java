@@ -15,6 +15,7 @@ import java.util.List;
 public class VideoResponseDto{
     private Long id;
     private String titulo;
+    private String thumbnail;
     private String descricao;
     private String categoria;
     private LocalDate dataPublicacao;
