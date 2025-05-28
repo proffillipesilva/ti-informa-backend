@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class VideoUploadDTO {
     private MultipartFile file;
+    private MultipartFile thumbnail;
     private String titulo;
     private String descricao;
     private String categoria;
