@@ -56,6 +56,7 @@ public class StorageController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadVideo(
             @RequestParam("file") MultipartFile file,
+            @RequestParam("thumbnail") MultipartFile thumbnail,
             @RequestParam("titulo") String titulo,
             @RequestParam("descricao") String descricao,
             @RequestParam(value = "categoria", required = false) String categoria,
@@ -63,28 +64,20 @@ public class StorageController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         log.info("Recebida requisição de upload de vídeo para o usuário: {}", userDetails.getUsername());
-        log.info("Título do vídeo: {}", titulo);
-        log.info("Descrição do vídeo: {}", descricao);
-        log.info("Categoria do vídeo: {}", categoria);
-        log.info("JSON de palavras-chave recebido: {}", palavra_chave);
+        log.info("Tamanho do thumbnail: {}", thumbnail.getSize());
 
         List<String> palavraChave = Collections.emptyList();
         try {
             if (palavra_chave != null) {
                 palavraChave = objectMapper.readValue(palavra_chave, new TypeReference<List<String>>() {});
-                log.info("Palavras-chave desserializadas: {}", palavraChave);
-            } else {
-                log.info("Nenhuma palavra-chave fornecida.");
             }
 
             Criador criador = criadorRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> {
-                        log.error("Criador não encontrado para o email: {}", userDetails.getUsername());
-                        return new RuntimeException("Criador não encontrado");
-                    });
+                    .orElseThrow(() -> new RuntimeException("Criador não encontrado"));
 
             VideoUploadDTO dto = new VideoUploadDTO(
                     file,
+                    thumbnail,
                     titulo,
                     descricao,
                     categoria,
@@ -94,6 +87,7 @@ public class StorageController {
 
             String response = String.valueOf(storageService.uploadFile(
                     dto.getFile(),
+                    dto.getThumbnail(),
                     dto.getTitulo(),
                     dto.getDescricao(),
                     dto.getCategoria(),
@@ -103,15 +97,12 @@ public class StorageController {
             ));
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (JsonProcessingException e) {
-            log.error("Erro ao processar JSON de palavras-chave: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao processar palavras-chave: " + e.getMessage());
         } catch (Exception e) {
             log.error("Erro durante o upload do vídeo: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no upload do vídeo: " + e.getMessage());
         }
     }
-
+    
     @GetMapping("/meus-videos")
     @Transactional
     public ResponseEntity<?> listarMeusVideos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
