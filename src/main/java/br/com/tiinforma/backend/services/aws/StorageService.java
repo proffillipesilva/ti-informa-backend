@@ -45,10 +45,10 @@ public class StorageService  {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-
     @Transactional
     public String uploadFile(
             MultipartFile file,
+            MultipartFile thumbnail,
             String titulo,
             String descricao,
             String categoria,
@@ -56,8 +56,8 @@ public class StorageService  {
             String palavraChaveString,
             Criador criador
     ) {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("O arquivo não pode estar vazio");
+        if (file.isEmpty() || thumbnail.isEmpty()) {
+            throw new IllegalArgumentException("O arquivo e a thumbnail não podem estar vazios");
         }
 
         String contentType = file.getContentType();
@@ -68,15 +68,21 @@ public class StorageService  {
         File fileObj = convertMultiPartFileToFile(file);
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
+        File thumbnailFile = convertMultiPartFileToFile(thumbnail);
+        String thumbnailFileName = "thumb_" + System.currentTimeMillis() + "_" + thumbnail.getOriginalFilename();
+
         try {
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType("video/mp4");
+            ObjectMetadata videoMetadata = new ObjectMetadata();
+            videoMetadata.setContentType("video/mp4");
+            PutObjectRequest videoPutRequest = new PutObjectRequest(bucketName, fileName, fileObj);
+            videoPutRequest.setMetadata(videoMetadata);
+            s3Client.putObject(videoPutRequest);
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, fileName, fileObj);
-            putObjectRequest.setMetadata(metadata);
+            ObjectMetadata thumbnailMetadata = new ObjectMetadata();
+            thumbnailMetadata.setContentType(thumbnail.getContentType());
+            s3Client.putObject(new PutObjectRequest(bucketName, thumbnailFileName, thumbnailFile));
 
-            s3Client.putObject(putObjectRequest);
-
+            String thumbnailUrl = thumbnailFileName;
 
             List<String> palavrasChaveList = null;
             if (palavraChaveString != null && !palavraChaveString.trim().isEmpty()) {
@@ -93,6 +99,7 @@ public class StorageService  {
                     .palavraChave(palavrasChaveList != null ? String.join(",", palavrasChaveList) : null)
                     .dataPublicacao(dataCadastro != null ? dataCadastro : LocalDate.now())
                     .key(fileName)
+                    .thumbnail(thumbnailUrl)
                     .criador(criador)
                     .build();
             log.info("Video a ser salvo: {}", video);
@@ -104,9 +111,11 @@ public class StorageService  {
             if (fileObj.exists()) {
                 fileObj.delete();
             }
+            if (thumbnailFile.exists()) {
+                thumbnailFile.delete();
+            }
         }
     }
-
 
     public <T extends FotoAtualizavel> String uploadFoto(
             MultipartFile file,
@@ -142,7 +151,6 @@ public class StorageService  {
         return null;
     }
 
-
     public String deleteFile(String fileName, String username) {
         Video video = videoRepository.findByKey(fileName);
 
@@ -164,9 +172,6 @@ public class StorageService  {
 
         return "Vídeo excluído: " + fileName;
     }
-
-
-
 
     private File convertMultiPartFileToFile(MultipartFile file){
         File convertFile = new File(file.getOriginalFilename());
