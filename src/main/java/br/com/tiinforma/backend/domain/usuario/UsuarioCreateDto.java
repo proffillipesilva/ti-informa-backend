@@ -1,16 +1,3 @@
-package br.com.tiinforma.backend.domain.usuario;
-
-import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
-import br.com.tiinforma.backend.domain.playlist.PlaylistResponseDto;
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -28,6 +15,7 @@ public class UsuarioCreateDto {
     )
     private String senha;
     private String interesses;
+    private String descricao;
     private List<PlaylistResponseDto> playlistDtos;
     private List<AssinaturaResponseDto> assinaturaDtos;
     private List<UsuarioResponseDto> pergunta_resposta;
