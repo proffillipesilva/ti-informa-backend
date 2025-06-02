@@ -45,6 +45,8 @@ public class Usuario implements Serializable, FotoAtualizavel {
 
     private String fotoUrl;
 
+    private String descricao;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Playlist> playlists= new ArrayList<>();
