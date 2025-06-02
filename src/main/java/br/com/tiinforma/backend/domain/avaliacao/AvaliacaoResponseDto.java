@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AvaliacaoResponseDto {
-    @Size(max = 10)
+    @Size(max = 5)
     private Long id;
     private Integer nota;
     private String comentario;

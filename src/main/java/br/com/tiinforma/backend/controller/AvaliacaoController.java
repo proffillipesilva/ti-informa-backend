@@ -63,4 +63,15 @@ public class AvaliacaoController {
         avaliacaoService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping(value = "/usuario/{userId}/video/{videoId}",
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    public ResponseEntity<AvaliacaoModel> findByUsuarioAndVideo(
+            @PathVariable Long userId,
+            @PathVariable Long videoId) {
+
+        AvaliacaoResponseDto dto = avaliacaoService.findByUsuarioAndVideo(userId, videoId);
+        AvaliacaoModel model = avaliacaoModelAssembler.toModel(dto);
+        return ResponseEntity.ok(model);
+    }
 }
