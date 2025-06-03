@@ -68,6 +68,8 @@ public class AuthController {
     @Autowired
     private PlaylistVideoRepository playlistVideoRepository;
 
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -134,26 +136,46 @@ public class AuthController {
 
     @PostMapping("register/criador")
     public ResponseEntity<?> registerCriador(@RequestBody @Valid CriadorCreateDto criadorCreateDto) {
-        if (criadorRepository.findByEmail(criadorCreateDto.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email já cadastrado");
-        }
-
         if (criadorRepository.findByCpf(criadorCreateDto.getCpf()).isPresent()) {
-            return ResponseEntity.badRequest().body("CPF já cadastrado");
+            return ResponseEntity.badRequest().body("CPF já cadastrado.");
         }
 
         if (criadorCreateDto.getSenha() == null || criadorCreateDto.getSenha().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Senha não pode estar vazia");
+            return ResponseEntity.badRequest().body("Senha não pode estar vazia.");
         }
 
-        String senhaEncriptada = new BCryptPasswordEncoder().encode(criadorCreateDto.getSenha());
+        String senhaFornecidaCriador = criadorCreateDto.getSenha();
+
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(criadorCreateDto.getEmail());
+
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
+
+            if (!passwordEncoder.matches(senhaFornecidaCriador, usuario.getSenha())) {
+                return ResponseEntity.badRequest().body("A senha fornecida para o criador deve ser a mesma do usuário já existente com este e-mail.");
+            }
+
+            if (!usuario.getFuncao().equals(Funcao.CRIADOR) && !usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
+                usuario.setFuncao(Funcao.CRIADOR);
+                usuarioRepository.save(usuario);
+                log.info("Usuário com email {} atualizado para a função CRIADOR.", criadorCreateDto.getEmail());
+            } else if (usuario.getFuncao().equals(Funcao.CRIADOR) || usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
+                return ResponseEntity.badRequest().body("Já existe um usuário com esta função associado a este e-mail.");
+            }
+        } else {
+            if (criadorRepository.findByEmail(criadorCreateDto.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest().body("Email já cadastrado como criador. Use um email diferente ou entre em contato com o suporte.");
+            }
+        }
+
+        String senhaEncriptadaCriador = passwordEncoder.encode(senhaFornecidaCriador);
 
         Criador criador = Criador.builder()
                 .nome(criadorCreateDto.getNome())
                 .email(criadorCreateDto.getEmail())
                 .cpf(criadorCreateDto.getCpf())
                 .formacao(criadorCreateDto.getFormacao())
-                .senha(senhaEncriptada)
+                .senha(senhaEncriptadaCriador)
                 .funcao(Funcao.CRIADOR)
                 .build();
 
@@ -229,31 +251,42 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getLoggedInUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        if (userDetails != null) {
-            Criador criador = criadorRepository.findByEmail(userDetails.getUsername()).orElse(null);
-            if (criador != null) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Não autenticado");
+        }
+
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(userDetails.getUsername());
+
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        if (usuario.getFuncao().equals(Funcao.CRIADOR)) {
+            Optional<Criador> criadorOptional = criadorRepository.findByEmail(usuario.getEmail());
+
+            if (criadorOptional.isPresent()) {
+                Criador criador = criadorOptional.get();
                 return ResponseEntity.ok(Map.of(
                         "nome", criador.getNome(),
                         "email", criador.getEmail(),
                         "isCriador", true,
-                        "funcao", criador.getFuncao().name()
+                        "funcao", criador.getFuncao().name(),
+                        "formacao", criador.getFormacao() != null ? criador.getFormacao() : ""
                 ));
             } else {
-                Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
-                if (usuario != null) {
-                    return ResponseEntity.ok(Map.of(
-                            "nome", usuario.getNome(),
-                            "email", usuario.getEmail(),
-                            "isCriador", false,
-                            "funcao", usuario.getFuncao().name(),
-                            "interesses", usuario.getInteresses()
-                    ));
-                } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
-                }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Consistência de dados comprometida: Usuário com função CRIADOR sem registro de Criador.");
             }
+        } else {
+            return ResponseEntity.ok(Map.of(
+                    "nome", usuario.getNome(),
+                    "email", usuario.getEmail(),
+                    "isCriador", false,
+                    "funcao", usuario.getFuncao().name(),
+                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : ""
+            ));
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Não autenticado");
     }
 
     @CrossOrigin(origins = "http://localhost:3000")

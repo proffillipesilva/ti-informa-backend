@@ -46,6 +46,8 @@ public class Video implements Serializable {
     @Column(name = "palavra_chave")
     private String palavraChave;
 
+    private Long visualizacoes = 0L;
+
     @ManyToOne
     @JoinColumn(name = "id_criador")
     @JsonBackReference
