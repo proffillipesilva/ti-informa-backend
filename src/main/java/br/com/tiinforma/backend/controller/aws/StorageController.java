@@ -1,6 +1,7 @@
 package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.video.Video;
@@ -11,6 +12,7 @@ import br.com.tiinforma.backend.repositories.CriadorRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
+import br.com.tiinforma.backend.services.interfaces.VideoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/file")
@@ -52,6 +54,9 @@ public class StorageController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private VideoService videoService;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadVideo(
@@ -102,7 +107,7 @@ public class StorageController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no upload do vídeo: " + e.getMessage());
         }
     }
-    
+
     @GetMapping("/meus-videos")
     @Transactional
     public ResponseEntity<?> listarMeusVideos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -161,9 +166,78 @@ public class StorageController {
         return ResponseEntity.ok(mensagem);
     }
 
+    @GetMapping("/videos-recomendados")
+    public ResponseEntity<List<VideoResponseDto>> getRecommendedVideos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(userDetails.getUsername());
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
+        Usuario usuario = usuarioOptional.get();
+        List<Video> recommendedVideos = new ArrayList<>();
 
+        String interessesRaw = usuario.getInteresses();
+        List<String> interessesList = null;
 
+        if (interessesRaw != null && !interessesRaw.trim().isEmpty()) {
+            interessesList = Arrays.asList(interessesRaw.split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
 
+        if (interessesList != null && !interessesList.isEmpty()) {
+            recommendedVideos.addAll(videoService.buscarVideosRecomendados(interessesList));
+        }
+
+        List<Video> popularVideos = videoService.buscarVideosPopulares();
+        recommendedVideos.addAll(popularVideos);
+
+        List<Video> uniqueVideos = recommendedVideos.stream()
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<VideoResponseDto> dtos = uniqueVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/videos-populares")
+    public ResponseEntity<List<VideoResponseDto>> getPopularVideos() {
+        List<Video> popularVideos = videoService.buscarVideosPopulares();
+        List<VideoResponseDto> dtos = popularVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/{videoId}/visualizacao")
+    public ResponseEntity<Void> incrementVideoViews(@PathVariable Long videoId) {
+        videoService.incrementarVisualizacao(videoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    private VideoResponseDto convertToDto(Video video) {
+        List<String> palavrasChaveList = video.getPalavraChave() != null && !video.getPalavraChave().isEmpty() ?
+                Arrays.asList(video.getPalavraChave().split(",")).stream().map(String::trim).collect(Collectors.toList()) :
+                List.of();
+
+        return new VideoResponseDto(
+                video.getId(),
+                video.getTitulo(),
+                video.getThumbnail(),
+                video.getDescricao(),
+                video.getCategoria(),
+                video.getDataPublicacao(),
+                palavrasChaveList,
+                video.getKey()
+        );
+    }
 }

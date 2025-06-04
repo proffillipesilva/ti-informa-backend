@@ -1,12 +1,23 @@
 package br.com.tiinforma.backend.controller.auth;
 
-import br.com.tiinforma.backend.domain.dtosComuns.AtualizarSenhaDto;
+import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
+import br.com.tiinforma.backend.domain.dtosComuns.login.AuthLoginDto;
+import br.com.tiinforma.backend.domain.dtosComuns.login.LoginResponseDto;
+import br.com.tiinforma.backend.domain.embeddedPk.PlaylistVideoId;
+import br.com.tiinforma.backend.domain.enums.Funcao;
+import br.com.tiinforma.backend.domain.enums.Visibilidade;
+import br.com.tiinforma.backend.domain.playlist.Playlist;
+import br.com.tiinforma.backend.domain.playlist.PlaylistCreateDto;
+import br.com.tiinforma.backend.domain.playlist.PlaylistResponseDto;
+import br.com.tiinforma.backend.domain.playlistVideo.PlaylistVideo;
+import br.com.tiinforma.backend.domain.playlistVideo.PlaylistVideoResponseDto;
+import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
-import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
-import br.com.tiinforma.backend.repositories.UsuarioRepository;
-import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.domain.video.Video;
+import br.com.tiinforma.backend.repositories.*;
 import br.com.tiinforma.backend.security.jwt.TokenService;
 import br.com.tiinforma.backend.services.aws.StorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +31,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -34,38 +44,59 @@ import java.util.stream.Collectors;
 @RequestMapping("auth")
 public class AuthController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
-    private final UsuarioRepository usuarioRepository;
-    private final CriadorRepository criadorRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final TokenService tokenService;
-    private final ObjectMapper objectMapper;
-    private final StorageService storageService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Autowired
-    public AuthController(
-            UsuarioRepository usuarioRepository,
-            CriadorRepository criadorRepository,
-            PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
-            TokenService tokenService,
-            ObjectMapper objectMapper,
-            StorageService storageService
-    ) {
-        this.usuarioRepository = usuarioRepository;
-        this.criadorRepository = criadorRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.tokenService = tokenService;
-        this.objectMapper = objectMapper;
-        this.storageService = storageService;
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CriadorRepository criadorRepository;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private StorageService storageService;
+
+    @Autowired
+    private VideoRepository videoRepository;
+
+    @Autowired
+    private PlaylistRepository playlistRepository;
+
+    @Autowired
+    private PlaylistVideoRepository playlistVideoRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid AuthLoginDto loginRequest) {
+        var usernameSenha = new UsernamePasswordAuthenticationToken(
+                loginRequest.getEmail(), loginRequest.getSenha()
+        );
+
+        var auth = this.authenticationManager.authenticate(usernameSenha);
+        var principal = auth.getPrincipal();
+
+        if (principal instanceof UserDetailsImpl userDetails) {
+            String token = tokenService.gerarToken(userDetails);
+
+            return ResponseEntity.ok(new LoginResponseDto(token));
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Erro ao autenticar usuário.");
     }
 
-    // Cadastro de usuário comum
-    @PostMapping("/registrar")
-    public ResponseEntity<?> registrarUsuario(@RequestBody @Valid UsuarioCreateDto usuarioCreateDto) {
+
+
+
+    @PostMapping("/register/usuario")
+    public ResponseEntity<?> registerUsuario(@RequestBody @Valid UsuarioCreateDto usuarioCreateDto) {
         Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(usuarioCreateDto.getEmail());
         if (usuarioExistente.isPresent()) {
             return ResponseEntity.badRequest().body("E-mail já cadastrado!");
@@ -73,7 +104,8 @@ public class AuthController {
         if (usuarioCreateDto.getSenha() == null || usuarioCreateDto.getSenha().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Senha não pode estar vazia.");
         }
-        String senhaEncriptada = passwordEncoder.encode(usuarioCreateDto.getSenha());
+        String senhaEncriptada = new BCryptPasswordEncoder().encode(usuarioCreateDto.getSenha());
+        Funcao funcaoUsuario = Funcao.USUARIO;
         String perguntaRespostaJson = null;
         if (usuarioCreateDto.getPergunta_resposta() != null && !usuarioCreateDto.getPergunta_resposta().isEmpty()) {
             try {
@@ -86,11 +118,12 @@ public class AuthController {
                 return ResponseEntity.internalServerError().body("Erro ao processar as perguntas de segurança.");
             }
         }
+
         Usuario usuario = Usuario.builder()
                 .nome(usuarioCreateDto.getNome())
                 .email(usuarioCreateDto.getEmail())
                 .senha(senhaEncriptada)
-                .funcao(usuarioCreateDto.getFuncao())
+                .funcao(funcaoUsuario)
                 .interesses(usuarioCreateDto.getInteresses())
                 .pergunta_resposta(perguntaRespostaJson)
                 .build();
@@ -98,62 +131,164 @@ public class AuthController {
         return ResponseEntity.ok("Usuário cadastrado com sucesso!");
     }
 
-    // Autenticação (login)
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginDto) {
-        String email = loginDto.get("email");
-        String senha = loginDto.get("senha");
 
-        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
-        if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário ou senha incorretos.");
+
+
+    @PostMapping("register/criador")
+    public ResponseEntity<?> registerCriador(@RequestBody @Valid CriadorCreateDto criadorCreateDto) {
+        if (criadorRepository.findByCpf(criadorCreateDto.getCpf()).isPresent()) {
+            return ResponseEntity.badRequest().body("CPF já cadastrado.");
         }
-        Usuario usuario = usuarioOptional.get();
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário ou senha incorretos.");
+
+        if (criadorCreateDto.getSenha() == null || criadorCreateDto.getSenha().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Senha não pode estar vazia.");
         }
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, senha));
-        String token = tokenService.gerarToken(new UserDetailsImpl(usuario));
-        return ResponseEntity.ok(Map.of("token", token));
+
+        String senhaFornecidaCriador = criadorCreateDto.getSenha();
+
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(criadorCreateDto.getEmail());
+
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
+
+            if (!passwordEncoder.matches(senhaFornecidaCriador, usuario.getSenha())) {
+                return ResponseEntity.badRequest().body("A senha fornecida para o criador deve ser a mesma do usuário já existente com este e-mail.");
+            }
+
+            if (!usuario.getFuncao().equals(Funcao.CRIADOR) && !usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
+                usuario.setFuncao(Funcao.CRIADOR);
+                usuarioRepository.save(usuario);
+                log.info("Usuário com email {} atualizado para a função CRIADOR.", criadorCreateDto.getEmail());
+            } else if (usuario.getFuncao().equals(Funcao.CRIADOR) || usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
+                return ResponseEntity.badRequest().body("Já existe um usuário com esta função associado a este e-mail.");
+            }
+        } else {
+            if (criadorRepository.findByEmail(criadorCreateDto.getEmail()).isPresent()) {
+                return ResponseEntity.badRequest().body("Email já cadastrado como criador. Use um email diferente ou entre em contato com o suporte.");
+            }
+        }
+
+        String senhaEncriptadaCriador = passwordEncoder.encode(senhaFornecidaCriador);
+
+        Criador criador = Criador.builder()
+                .nome(criadorCreateDto.getNome())
+                .email(criadorCreateDto.getEmail())
+                .cpf(criadorCreateDto.getCpf())
+                .formacao(criadorCreateDto.getFormacao())
+                .senha(senhaEncriptadaCriador)
+                .funcao(Funcao.CRIADOR)
+                .build();
+
+        criadorRepository.save(criador);
+
+        return ResponseEntity.ok("Criador cadastrado com sucesso!");
     }
 
-    // Completar cadastro do usuário autenticado
+
     @PutMapping("/completar-cadastro/usuario")
     public ResponseEntity<?> completarCadastroUsuario(
             @RequestBody @Valid UsuarioCreateDto usuarioDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(userDetails.getId());
+
         if (usuarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         }
+
         Usuario usuario = usuarioOptional.get();
-        usuario.setSenha(passwordEncoder.encode(usuarioDto.getSenha()));
+
+        usuario.setSenha(new BCryptPasswordEncoder().encode(usuarioDto.getSenha()));
         usuario.setInteresses(usuarioDto.getInteresses());
+
         usuarioRepository.save(usuario);
+
         return ResponseEntity.ok("Cadastro atualizado com sucesso!");
     }
 
-    // Alterar senha do usuário autenticado
-    @PutMapping("/alterar-senha")
-    public ResponseEntity<?> alterarSenha(
-            @RequestBody @Valid AtualizarSenhaDto atualizarSenhaDto,
+
+    @PutMapping("/completar-cadastro/criador")
+    public ResponseEntity<?> completarCadastroCriador(
+            @RequestBody @Valid CriadorCreateDto criadorDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
+        Optional<Criador> criadorOptional = criadorRepository.findById(userDetails.getId());
+
+        if (criadorOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Criador não encontrado");
+        }
+
+        Criador criador = criadorOptional.get();
+
+        criador.setSenha(new BCryptPasswordEncoder().encode(criadorDto.getSenha()));
+        criador.setCpf(criadorDto.getCpf());
+        criador.setFormacao(criadorDto.getFormacao());
+
+        criadorRepository.save(criador);
+
+        return ResponseEntity.ok("Cadastro de criador atualizado com sucesso!");
+    }
+
+
+    @PutMapping("/usuario/interesses")
+    public ResponseEntity<?> atualizarInteressesUsuario(
+            @RequestBody Map<String, String> requestBody,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        String interesses = requestBody.get("interesses");
+
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(userDetails.getId());
         if (usuarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         }
+
         Usuario usuario = usuarioOptional.get();
-        if (!passwordEncoder.matches(atualizarSenhaDto.getSenhaAntiga(), usuario.getSenha())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Senha antiga incorreta.");
-        }
-        usuario.setSenha(passwordEncoder.encode(atualizarSenhaDto.getNovaSenha()));
+        usuario.setInteresses(interesses);
         usuarioRepository.save(usuario);
-        return ResponseEntity.ok("Senha alterada com sucesso!");
+
+        return ResponseEntity.ok("Interesses atualizados com sucesso!");
     }
 
-    // Recuperar pergunta de segurança (para esqueceu a senha)
+    @GetMapping("/me")
+    public ResponseEntity<?> getLoggedInUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Não autenticado");
+        }
+
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(userDetails.getUsername());
+
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        if (usuario.getFuncao().equals(Funcao.CRIADOR)) {
+            Optional<Criador> criadorOptional = criadorRepository.findByEmail(usuario.getEmail());
+
+            if (criadorOptional.isPresent()) {
+                Criador criador = criadorOptional.get();
+                return ResponseEntity.ok(Map.of(
+                        "nome", criador.getNome(),
+                        "email", criador.getEmail(),
+                        "isCriador", true,
+                        "funcao", criador.getFuncao().name(),
+                        "formacao", criador.getFormacao() != null ? criador.getFormacao() : ""
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Consistência de dados comprometida: Usuário com função CRIADOR sem registro de Criador.");
+            }
+        } else {
+            return ResponseEntity.ok(Map.of(
+                    "nome", usuario.getNome(),
+                    "email", usuario.getEmail(),
+                    "isCriador", false,
+                    "funcao", usuario.getFuncao().name(),
+                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : ""
+            ));
+        }
+    }
+
     @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/recuperar-senha/pergunta")
     public ResponseEntity<?> buscarPerguntaSeguranca(@RequestParam String email) {
@@ -178,12 +313,12 @@ public class AuthController {
         }
     }
 
-    // Verificar resposta da pergunta de segurança
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/recuperar-senha/verificar-resposta")
     public ResponseEntity<?> verificarRespostaSeguranca(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String resposta = payload.get("resposta");
+
         Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
         if (usuarioOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("E-mail não encontrado.");
@@ -206,28 +341,26 @@ public class AuthController {
         }
     }
 
-    // Redefinir a senha após validação da pergunta de segurança
     @PutMapping("/recuperar-senha/redefinir")
-    public ResponseEntity<?> redefinirSenhaEsquecida(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> redefinirSenha(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String novaSenha = payload.get("novaSenha");
-        if (novaSenha == null || novaSenha.length() < 8) {
-            return ResponseEntity.badRequest().body("A nova senha deve ter no mínimo 8 caracteres.");
+
+        if (email == null || novaSenha == null || email.isBlank() || novaSenha.isBlank()) {
+            return ResponseEntity.badRequest().body("Email e nova senha são obrigatórios.");
         }
+
         Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
         if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("E-mail não encontrado.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
+
         Usuario usuario = usuarioOptional.get();
-        usuario.setSenha(passwordEncoder.encode(novaSenha));
+        String senhaEncriptada = new BCryptPasswordEncoder().encode(novaSenha);
+        usuario.setSenha(senhaEncriptada);
         usuarioRepository.save(usuario);
-        return ResponseEntity.ok("Senha redefinida com sucesso!");
+
+        return ResponseEntity.ok("Senha redefinida com sucesso.");
     }
 
-    // (Opcional) Listar todos os usuários (exemplo administrativo)
-    @GetMapping("/usuarios")
-    public ResponseEntity<List<Usuario>> listarUsuarios() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        return ResponseEntity.ok(usuarios);
-    }
 }

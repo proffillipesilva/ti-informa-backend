@@ -1,3 +1,16 @@
+package br.com.tiinforma.backend.domain.usuario;
+
+import br.com.tiinforma.backend.domain.assinatura.AssinaturaResponseDto;
+import br.com.tiinforma.backend.domain.playlist.PlaylistResponseDto;
+import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter

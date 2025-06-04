@@ -8,6 +8,8 @@ import java.util.List;
 public interface AvaliacaoService {
     AvaliacaoResponseDto findById(Long id);
 
+    AvaliacaoResponseDto findByUsuarioAndVideo(Long usuarioId, Long videoId);
+
     List<AvaliacaoResponseDto> findAll();
 
     AvaliacaoResponseDto create(AvaliacaoCreateDto avaliacaoCreateDto);
@@ -15,4 +17,5 @@ public interface AvaliacaoService {
     AvaliacaoCreateDto update(AvaliacaoCreateDto avaliacaoCreateDto);
 
     void delete(Long id);
+
 }
