@@ -198,8 +198,6 @@ public class DBService {
         );
         playlistRepository.saveAll(playlists);
     }
-
-    // Função para atualizar a descrição do usuário
     public void atualizarDescricaoUsuario(Long usuarioId, String descricao) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(usuarioId);
         if (usuarioOptional.isPresent()) {
@@ -209,22 +207,5 @@ public class DBService {
         } else {
             throw new RuntimeException("Usuário não encontrado");
         }
-    }
-
-    @PutMapping("/completar-cadastro/usuario")
-    public ResponseEntity<?> completarCadastroUsuario(
-            @RequestBody @Valid UsuarioCreateDto usuarioDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
-    ) {
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(userDetails.getId());
-        if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
-        }
-        Usuario usuario = usuarioOptional.get();
-        usuario.setSenha(passwordEncoder.encode(usuarioDto.getSenha()));
-        usuario.setInteresses(usuarioDto.getInteresses());
-        usuario.setDescricao(usuarioDto.getDescricao());
-        usuarioRepository.save(usuario);
-        return ResponseEntity.ok("Cadastro atualizado com sucesso!");
     }
 }
