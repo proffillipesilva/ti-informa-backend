@@ -226,4 +226,48 @@ public class PlaylistController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PatchMapping("/{id}/visibilidade")
+    public ResponseEntity<PlaylistResponseDto> updateVisibilidade(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        Playlist playlist = playlistRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist não encontrada"));
+
+        if (!playlist.getUsuario().getId().equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String visibilidadeStr = body.get("visibilidade");
+        if (visibilidadeStr == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            Visibilidade visibilidade = Visibilidade.valueOf(visibilidadeStr);
+            playlist.setVisibilidade(visibilidade);
+            playlistRepository.save(playlist);
+
+            return ResponseEntity.ok(new PlaylistResponseDto(
+                    playlist.getId(),
+                    playlist.getUsuario().getId(),
+                    playlist.getCriador() != null ? playlist.getCriador().getId() : null,
+                    playlist.getNome(),
+                    playlist.getVisibilidade(),
+                    playlist.getPlaylistVideos().stream()
+                            .map(pv -> new PlaylistVideoResponseDto(
+                                    pv.getVideo().getId(),
+                                    pv.getVideo().getTitulo(),
+                                    pv.getVideo().getKey(),
+                                    pv.getPosicaoVideo(),
+                                    pv.getDataAdicao()
+                            ))
+                            .collect(Collectors.toList())
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
