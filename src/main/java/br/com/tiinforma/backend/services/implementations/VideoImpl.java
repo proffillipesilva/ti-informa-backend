@@ -44,13 +44,22 @@ public class VideoImpl implements VideoService {
 
     @Override
     @Transactional
-    public void incrementarVisualizacao(Long videoId) {
+    public boolean incrementarVisualizacao(Long videoId) {
         Optional<Video> videoOptional = videoRepository.findById(videoId);
         if (videoOptional.isPresent()) {
             Video video = videoOptional.get();
-            video.setVisualizacoes(video.getVisualizacoes() + 1);
+            long currentViews = (video.getVisualizacoes() != null) ? video.getVisualizacoes() : 0L;
+            video.setVisualizacoes(currentViews + 1);
             videoRepository.save(video);
+            return true;
         } else {
+            return false;
         }
+    }
+
+    @Override
+    public Long getVisualizacoes(Long videoId) {
+        Optional<Video> videoOptional = videoRepository.findById(videoId);
+        return videoOptional.map(Video::getVisualizacoes).orElse(null);
     }
 }

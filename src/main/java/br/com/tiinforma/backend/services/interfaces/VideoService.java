@@ -11,5 +11,7 @@ public interface VideoService {
 
     List<Video> buscarVideosRecomendados(List<String> interessesUsuario);
 
-    void incrementarVisualizacao(Long videoId);
+    boolean incrementarVisualizacao(Long videoId);
+
+    Long getVisualizacoes(Long videoId);
 }

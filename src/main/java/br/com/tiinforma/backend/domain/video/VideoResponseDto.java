@@ -21,4 +21,5 @@ public class VideoResponseDto{
     private LocalDate dataPublicacao;
     private List<String> palavraChave;
     private String key;
+    private Long visualizacoes;
 }

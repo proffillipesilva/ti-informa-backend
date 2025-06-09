@@ -209,19 +209,15 @@ public class StorageController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping("/videos-populares")
-    public ResponseEntity<List<VideoResponseDto>> getPopularVideos() {
-        List<Video> popularVideos = videoService.buscarVideosPopulares();
-        List<VideoResponseDto> dtos = popularVideos.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
 
     @PostMapping("/{videoId}/visualizacao")
     public ResponseEntity<Void> incrementVideoViews(@PathVariable Long videoId) {
-        videoService.incrementarVisualizacao(videoId);
-        return ResponseEntity.noContent().build();
+        boolean success = videoService.incrementarVisualizacao(videoId);
+        if (success) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private VideoResponseDto convertToDto(Video video) {
@@ -237,7 +233,27 @@ public class StorageController {
                 video.getCategoria(),
                 video.getDataPublicacao(),
                 palavrasChaveList,
-                video.getKey()
+                video.getKey(),
+                video.getVisualizacoes()
         );
+    }
+
+    @GetMapping("/{videoId}/visualizacoes")
+    public ResponseEntity<Long> getVideoViews(@PathVariable Long videoId) {
+        Optional<Video> videoOptional = videoRepository.findById(videoId);
+        if (videoOptional.isPresent()) {
+            return ResponseEntity.ok(videoOptional.get().getVisualizacoes());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/videos-populares")
+    public ResponseEntity<List<VideoResponseDto>> getPopularVideos() {
+        List<Video> popularVideos = videoService.buscarVideosPopulares();
+        List<VideoResponseDto> dtos = popularVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }
