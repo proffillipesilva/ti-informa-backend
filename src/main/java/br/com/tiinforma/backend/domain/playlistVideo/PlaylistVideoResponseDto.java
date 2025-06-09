@@ -17,4 +17,5 @@ public class PlaylistVideoResponseDto {
     private String key;
     private Integer posicaoVideo;
     private LocalDate dataAdicao;
+    private LocalDate dataPublicacao;
 }

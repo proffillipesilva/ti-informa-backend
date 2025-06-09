@@ -105,7 +105,8 @@ public class PlaylistController {
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
                         pv.getPosicaoVideo(),
-                        pv.getDataAdicao()
+                        pv.getDataAdicao(),
+                        pv.getVideo().getDataPublicacao()
                 ))
                 .collect(Collectors.toList());
 
@@ -155,7 +156,8 @@ public class PlaylistController {
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
                         pv.getPosicaoVideo(),
-                        pv.getDataAdicao()
+                        pv.getDataAdicao(),
+                        pv.getVideo().getDataPublicacao()
                 )).collect(Collectors.toList())
         )).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -218,7 +220,8 @@ public class PlaylistController {
                                 pv.getVideo().getTitulo(),
                                 pv.getVideo().getKey(),
                                 pv.getPosicaoVideo(),
-                                pv.getDataAdicao()
+                                pv.getDataAdicao(),
+                                pv.getVideo().getDataPublicacao()
                         ))
                         .collect(Collectors.toList())
         );
@@ -261,7 +264,8 @@ public class PlaylistController {
                                     pv.getVideo().getTitulo(),
                                     pv.getVideo().getKey(),
                                     pv.getPosicaoVideo(),
-                                    pv.getDataAdicao()
+                                    pv.getDataAdicao(),
+                                    pv.getVideo().getDataPublicacao()
                             ))
                             .collect(Collectors.toList())
             ));
