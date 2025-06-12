@@ -157,12 +157,15 @@ public class StorageController {
                 .body(resource);
     }
 
-    @DeleteMapping("/delete/{fileName}")
-    public ResponseEntity<String> deleteFile(
-            @PathVariable String fileName,
-            @AuthenticationPrincipal UserDetails userDetails
+    @DeleteMapping("/delete/{videoId}")
+    public ResponseEntity<String> deleteVideo(
+            @PathVariable Long videoId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        String mensagem = storageService.deleteFile(fileName, userDetails.getUsername());
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
+
+        String mensagem = storageService.deleteFile(video.getKey(), userDetails.getUsername());
         return ResponseEntity.ok(mensagem);
     }
 

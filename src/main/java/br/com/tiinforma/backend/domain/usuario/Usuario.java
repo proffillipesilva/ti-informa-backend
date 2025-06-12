@@ -47,6 +47,9 @@ public class Usuario implements Serializable, FotoAtualizavel {
 
     private String descricao;
 
+    @Column(name = "cadastro_completo", nullable = false, columnDefinition = "boolean default false")
+    private boolean cadastroCompleto = false;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<Playlist> playlists= new ArrayList<>();

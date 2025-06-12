@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.playlistVideo;
 
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,8 @@ import java.time.LocalDate;
 public class PlaylistVideoResponseDto {
     private Long videoId;
     private String titulo;
-    private String key;
+    private String videoKey;
+    private String videoThumbnail;
     private Integer posicaoVideo;
     private LocalDate dataAdicao;
     private LocalDate dataPublicacao;

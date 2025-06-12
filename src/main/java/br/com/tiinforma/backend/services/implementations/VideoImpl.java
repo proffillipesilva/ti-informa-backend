@@ -1,11 +1,16 @@
 package br.com.tiinforma.backend.services.implementations;
 
 import br.com.tiinforma.backend.domain.video.Video;
+import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.repositories.CriadorRepository;
 import br.com.tiinforma.backend.repositories.VideoRepository;
+import br.com.tiinforma.backend.services.aws.StorageService;
 import br.com.tiinforma.backend.services.interfaces.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +22,12 @@ public class VideoImpl implements VideoService {
 
     @Autowired
     private VideoRepository videoRepository;
+
+    @Autowired
+    private CriadorRepository criadorRepository;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public List<Video> buscarVideosPorCriador(Long criadorId) {
@@ -39,7 +50,9 @@ public class VideoImpl implements VideoService {
             recommendedVideos.addAll(videoRepository.findByCategoriaOrPalavraChaveContaining(interesse));
         }
 
-        return recommendedVideos.stream().distinct().collect(Collectors.toList());
+        return recommendedVideos.stream()
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -52,14 +65,46 @@ public class VideoImpl implements VideoService {
             video.setVisualizacoes(currentViews + 1);
             videoRepository.save(video);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
     public Long getVisualizacoes(Long videoId) {
-        Optional<Video> videoOptional = videoRepository.findById(videoId);
-        return videoOptional.map(Video::getVisualizacoes).orElse(null);
+        return videoRepository.findById(videoId)
+                .map(Video::getVisualizacoes)
+                .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public void deletarVideo(Long videoId, String username) {
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
+
+        if (!video.getCriador().getEmail().equals(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para excluir este vídeo");
+        }
+
+        try {
+            video.getPlaylistVideos().clear();
+            videoRepository.saveAndFlush(video);
+
+            storageService.deleteFile(video.getKey(), username);
+
+            if (video.getThumbnail() != null && !video.getThumbnail().isEmpty()) {
+                storageService.deleteFile(video.getThumbnail(), username);
+            }
+
+            videoRepository.delete(video);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao excluir vídeo", e);
+        }
+    }
+
+    @Override
+    public Video buscarVideoPorId(Long videoId) {
+        return videoRepository.findById(videoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
     }
 }

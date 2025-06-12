@@ -9,10 +9,12 @@ import java.util.List;
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
     Video findByKey(String key);
-    List<Video> findByCriadorId(Long criadorId);
+    @Query("SELECT v FROM Video v WHERE v.criador.id = :criadorId")
+    List<Video> findByCriadorId(@Param("criadorId") Long criadorId);
 
     List<Video> findAllByOrderByVisualizacoesDesc();
 
     @Query("SELECT v FROM Video v WHERE v.categoria = :interesse OR v.palavraChave LIKE %:interesse%")
     List<Video> findByCategoriaOrPalavraChaveContaining(@Param("interesse") String interesse);
+
 }

@@ -151,6 +151,7 @@ public class StorageService  {
         return null;
     }
 
+    @Transactional
     public String deleteFile(String fileName, String username) {
         Video video = videoRepository.findByKey(fileName);
 
@@ -167,10 +168,20 @@ public class StorageService  {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para excluir este vídeo");
         }
 
-        s3Client.deleteObject(bucketName, fileName);
-        videoRepository.delete(video);
+        try {
+            s3Client.deleteObject(bucketName, fileName);
 
-        return "Vídeo excluído: " + fileName;
+            if (video.getThumbnail() != null && !video.getThumbnail().isEmpty()) {
+                s3Client.deleteObject(bucketName, video.getThumbnail());
+            }
+
+            videoRepository.delete(video);
+
+            return "Vídeo excluído com sucesso: " + fileName;
+        } catch (Exception e) {
+            log.error("Erro ao excluir vídeo", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao excluir vídeo");
+        }
     }
 
     private File convertMultiPartFileToFile(MultipartFile file){

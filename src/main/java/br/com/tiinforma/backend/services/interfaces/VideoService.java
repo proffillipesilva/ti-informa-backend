@@ -14,4 +14,8 @@ public interface VideoService {
     boolean incrementarVisualizacao(Long videoId);
 
     Long getVisualizacoes(Long videoId);
+
+    void deletarVideo(Long videoId, String username);
+
+    Video buscarVideoPorId(Long videoId);
 }

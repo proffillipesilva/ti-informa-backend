@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.controller.auth;
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.dtosComuns.login.AuthLoginDto;
+import br.com.tiinforma.backend.domain.dtosComuns.login.GoogleLoginRequestDto;
 import br.com.tiinforma.backend.domain.dtosComuns.login.LoginResponseDto;
 import br.com.tiinforma.backend.domain.embeddedPk.PlaylistVideoId;
 import br.com.tiinforma.backend.domain.enums.Funcao;
@@ -21,6 +22,9 @@ import br.com.tiinforma.backend.repositories.*;
 import br.com.tiinforma.backend.security.jwt.TokenService;
 import br.com.tiinforma.backend.services.aws.StorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -126,6 +131,7 @@ public class AuthController {
                 .funcao(funcaoUsuario)
                 .interesses(usuarioCreateDto.getInteresses())
                 .pergunta_resposta(perguntaRespostaJson)
+                .cadastroCompleto(true)
                 .build();
         usuarioRepository.save(usuario);
         return ResponseEntity.ok("Usuário cadastrado com sucesso!");
@@ -361,6 +367,152 @@ public class AuthController {
         usuarioRepository.save(usuario);
 
         return ResponseEntity.ok("Senha redefinida com sucesso.");
+    }
+
+    @PostMapping("/google-auth")
+    public ResponseEntity<?> googleAuth(@RequestBody GoogleLoginRequestDto googleLoginRequest) {
+        try {
+            log.info("Recebida requisição para /google-auth com idToken");
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(googleLoginRequest.getIdToken());
+
+            String email = decodedToken.getEmail();
+            String name = decodedToken.getName() != null ? decodedToken.getName() : "Usuário Google";
+
+            if (email == null || email.isEmpty()) {
+                log.error("Email nulo ou vazio obtido do token do Google");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Não foi possível obter o email do token do Google.");
+            }
+
+            Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(email);
+            Usuario usuario;
+
+            if (usuarioExistente.isPresent()) {
+                usuario = usuarioExistente.get();
+                log.info("Usuário existente encontrado: {}", usuario.getEmail());
+
+                boolean cadastroCompleto = usuario.isCadastroCompleto() &&
+                        usuario.getPergunta_resposta() != null &&
+                        !usuario.getPergunta_resposta().isEmpty() &&
+                        usuario.getInteresses() != null &&
+                        !usuario.getInteresses().isEmpty();
+
+                if (!cadastroCompleto) {
+                    log.info("Cadastro incompleto para usuário: {}", email);
+                    usuario.setCadastroCompleto(false);
+                    usuarioRepository.save(usuario);
+                }
+
+                String token = tokenService.gerarToken(new UserDetailsImpl(usuario));
+                return ResponseEntity.ok(new LoginResponseDto(
+                        token,
+                        usuario.getFuncao().name(),
+                        cadastroCompleto
+                ));
+
+            } else {
+                log.info("Criando novo usuário para: {}", email);
+                String generatedPassword = passwordEncoder.encode(UUID.randomUUID().toString());
+
+                Usuario novoUsuario = Usuario.builder()
+                        .nome(name)
+                        .email(email)
+                        .senha(generatedPassword)
+                        .funcao(Funcao.USUARIO)
+                        .cadastroCompleto(false)
+                        .build();
+
+                usuario = usuarioRepository.save(novoUsuario);
+
+                String token = tokenService.gerarToken(new UserDetailsImpl(usuario));
+                return ResponseEntity.ok(new LoginResponseDto(
+                        token,
+                        usuario.getFuncao().name(),
+                        false
+                ));
+            }
+
+        } catch (FirebaseAuthException e) {
+            log.error("Erro de autenticação Firebase: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token do Google inválido ou expirado.");
+        } catch (Exception e) {
+            log.error("Erro inesperado: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno ao processar login com Google.");
+        }
+    }
+
+    @PostMapping("/register/google")
+    public ResponseEntity<?> registerGoogleUser(
+            @RequestBody GoogleLoginRequestDto googleRequest,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        try {
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(googleRequest.getIdToken());
+            String email = decodedToken.getEmail();
+            String nome = decodedToken.getName();
+
+            if (userDetails != null && !email.equals(userDetails.getUsername())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email não corresponde ao usuário autenticado.");
+            }
+
+            Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
+            Usuario usuario;
+
+            if (usuarioOptional.isEmpty()) {
+                String generatedPassword = passwordEncoder.encode(UUID.randomUUID().toString());
+
+                usuario = Usuario.builder()
+                        .nome(nome)
+                        .email(email)
+                        .senha(generatedPassword)
+                        .interesses(googleRequest.getInteresses())
+                        .funcao(Funcao.USUARIO)
+                        .cadastroCompleto(false)
+                        .build();
+                usuarioRepository.save(usuario);
+
+                String token = tokenService.gerarToken(new UserDetailsImpl(usuario));
+                return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponseDto(token, usuario.getFuncao().name(), usuario.isCadastroCompleto()));
+
+            } else {
+                usuario = usuarioOptional.get();
+
+                String perguntaRespostaJson = null;
+                if (googleRequest.getPergunta_resposta() != null && !googleRequest.getPergunta_resposta().isEmpty()) {
+                    try {
+                        perguntaRespostaJson = objectMapper.writeValueAsString(
+                                googleRequest.getPergunta_resposta().stream()
+                                        .collect(Collectors.toMap(
+                                                UsuarioResponseDto::getPergunta,
+                                                UsuarioResponseDto::getResposta
+                                        ))
+                        );
+                    } catch (Exception e) {
+                        return ResponseEntity.internalServerError().body("Erro ao processar as perguntas de segurança.");
+                    }
+                }
+
+                usuario.setInteresses(googleRequest.getInteresses());
+                usuario.setPergunta_resposta(perguntaRespostaJson);
+                if (googleRequest.getInteresses() != null && !googleRequest.getInteresses().isEmpty() &&
+                        googleRequest.getPergunta_resposta() != null && !googleRequest.getPergunta_resposta().isEmpty()) {
+                    usuario.setCadastroCompleto(true);
+                } else {
+                    usuario.setCadastroCompleto(false);
+                }
+
+                usuarioRepository.save(usuario);
+
+                String token = tokenService.gerarToken(new UserDetailsImpl(usuario));
+
+                return ResponseEntity.ok(new LoginResponseDto(token, usuario.getFuncao().name(), usuario.isCadastroCompleto()));
+            }
+
+        } catch (FirebaseAuthException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token do Google inválido: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar cadastro: " + e.getMessage());
+        }
     }
 
 }

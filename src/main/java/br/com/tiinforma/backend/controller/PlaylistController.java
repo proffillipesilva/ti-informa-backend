@@ -104,6 +104,7 @@ public class PlaylistController {
                         pv.getVideo().getId(),
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
+                        pv.getVideo().getThumbnail(),
                         pv.getPosicaoVideo(),
                         pv.getDataAdicao(),
                         pv.getVideo().getDataPublicacao()
@@ -155,6 +156,7 @@ public class PlaylistController {
                         pv.getVideo().getId(),
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
+                        pv.getVideo().getThumbnail(),
                         pv.getPosicaoVideo(),
                         pv.getDataAdicao(),
                         pv.getVideo().getDataPublicacao()
@@ -219,6 +221,7 @@ public class PlaylistController {
                                 pv.getVideo().getId(),
                                 pv.getVideo().getTitulo(),
                                 pv.getVideo().getKey(),
+                                pv.getVideo().getThumbnail(),
                                 pv.getPosicaoVideo(),
                                 pv.getDataAdicao(),
                                 pv.getVideo().getDataPublicacao()
@@ -263,6 +266,7 @@ public class PlaylistController {
                                     pv.getVideo().getId(),
                                     pv.getVideo().getTitulo(),
                                     pv.getVideo().getKey(),
+                                    pv.getVideo().getThumbnail(),
                                     pv.getPosicaoVideo(),
                                     pv.getDataAdicao(),
                                     pv.getVideo().getDataPublicacao()

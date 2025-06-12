@@ -7,9 +7,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class LoginResponseDto {
-
     private String token;
+    private String funcao;
+    private boolean cadastroCompleto;
+
+    public LoginResponseDto(String token) {
+        this.token = token;
+        this.funcao = "USUARIO";
+        this.cadastroCompleto = false;
+    }
+
 }

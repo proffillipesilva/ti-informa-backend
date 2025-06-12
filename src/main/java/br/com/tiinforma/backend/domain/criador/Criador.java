@@ -46,8 +46,8 @@ public class Criador implements Serializable, FotoAtualizavel {
     @Builder.Default
     private List<Playlist> playlists= new ArrayList<>();
 
-    @OneToMany(mappedBy = "criador")
+    @OneToMany(mappedBy = "criador", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Video> videos= new ArrayList<>();
+    private List<Video> videos = new ArrayList<>();
 
 }
