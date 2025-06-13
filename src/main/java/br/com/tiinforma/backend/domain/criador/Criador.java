@@ -50,4 +50,7 @@ public class Criador implements Serializable, FotoAtualizavel {
     @Builder.Default
     private List<Video> videos = new ArrayList<>();
 
+    @Column(name = "status_solicitacao")
+    private String statusSolicitacao;
+
 }

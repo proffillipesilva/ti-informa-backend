@@ -279,18 +279,30 @@ public class AuthController {
                         "email", criador.getEmail(),
                         "isCriador", true,
                         "funcao", criador.getFuncao().name(),
-                        "formacao", criador.getFormacao() != null ? criador.getFormacao() : ""
+                        "formacao", criador.getFormacao() != null ? criador.getFormacao() : "",
+                        "isAdmin", false
                 ));
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Consistência de dados comprometida: Usuário com função CRIADOR sem registro de Criador.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Consistência de dados comprometida");
             }
+        } else if (usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
+            return ResponseEntity.ok(Map.of(
+                    "nome", usuario.getNome(),
+                    "email", usuario.getEmail(),
+                    "isCriador", false,
+                    "funcao", usuario.getFuncao().name(),
+                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : "",
+                    "isAdmin", true,
+                    "fotoUrl", usuario.getFotoUrl() != null ? usuario.getFotoUrl() : ""
+            ));
         } else {
             return ResponseEntity.ok(Map.of(
                     "nome", usuario.getNome(),
                     "email", usuario.getEmail(),
                     "isCriador", false,
                     "funcao", usuario.getFuncao().name(),
-                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : ""
+                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : "",
+                    "isAdmin", false
             ));
         }
     }
