@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/criador")
-@CrossOrigin(origins = "http://localhost:8080")
 public class CriadorController {
 
     @Autowired

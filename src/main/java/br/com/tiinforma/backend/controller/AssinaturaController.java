@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/assinaturas")
-@CrossOrigin(origins = "http://localhost:8080")
 public class AssinaturaController {
 
     @Autowired
