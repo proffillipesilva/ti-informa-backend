@@ -45,8 +45,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -307,7 +306,6 @@ public class AuthController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/recuperar-senha/pergunta")
     public ResponseEntity<?> buscarPerguntaSeguranca(@RequestParam String email) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
@@ -331,7 +329,6 @@ public class AuthController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/recuperar-senha/verificar-resposta")
     public ResponseEntity<?> verificarRespostaSeguranca(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
