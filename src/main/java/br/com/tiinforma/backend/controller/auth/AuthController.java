@@ -38,10 +38,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -268,42 +265,26 @@ public class AuthController {
 
         Usuario usuario = usuarioOptional.get();
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", usuario.getId());
+        response.put("nome", usuario.getNome());
+        response.put("email", usuario.getEmail());
+        response.put("funcao", usuario.getFuncao().name());
+        response.put("isAdmin", usuario.getFuncao().equals(Funcao.ADMINISTRADOR));
+        response.put("isCriador", usuario.getFuncao().equals(Funcao.CRIADOR));
+
         if (usuario.getFuncao().equals(Funcao.CRIADOR)) {
             Optional<Criador> criadorOptional = criadorRepository.findByEmail(usuario.getEmail());
-
             if (criadorOptional.isPresent()) {
                 Criador criador = criadorOptional.get();
-                return ResponseEntity.ok(Map.of(
-                        "nome", criador.getNome(),
-                        "email", criador.getEmail(),
-                        "isCriador", true,
-                        "funcao", criador.getFuncao().name(),
-                        "formacao", criador.getFormacao() != null ? criador.getFormacao() : "",
-                        "isAdmin", false
-                ));
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Consistência de dados comprometida");
+                response.put("formacao", criador.getFormacao() != null ? criador.getFormacao() : "");
             }
-        } else if (usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
-            return ResponseEntity.ok(Map.of(
-                    "nome", usuario.getNome(),
-                    "email", usuario.getEmail(),
-                    "isCriador", false,
-                    "funcao", usuario.getFuncao().name(),
-                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : "",
-                    "isAdmin", true,
-                    "fotoUrl", usuario.getFotoUrl() != null ? usuario.getFotoUrl() : ""
-            ));
         } else {
-            return ResponseEntity.ok(Map.of(
-                    "nome", usuario.getNome(),
-                    "email", usuario.getEmail(),
-                    "isCriador", false,
-                    "funcao", usuario.getFuncao().name(),
-                    "interesses", usuario.getInteresses() != null ? usuario.getInteresses() : "",
-                    "isAdmin", false
-            ));
+            response.put("interesses", usuario.getInteresses() != null ? usuario.getInteresses() : "");
+            response.put("fotoUrl", usuario.getFotoUrl() != null ? usuario.getFotoUrl() : "");
         }
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/recuperar-senha/pergunta")

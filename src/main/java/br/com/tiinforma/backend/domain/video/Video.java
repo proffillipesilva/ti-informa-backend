@@ -39,6 +39,8 @@ public class Video implements Serializable {
 
     private String descricao;
 
+    private String url;
+
     private LocalDate dataPublicacao = LocalDate.now();
 
     private String categoria;
@@ -48,12 +50,15 @@ public class Video implements Serializable {
 
     private Long visualizacoes = 0L;
 
+    @Column(name = "avaliacao_media")
+    private Double avaliacaoMedia;
+
     @ManyToOne
     @JoinColumn(name = "id_criador")
     @JsonBackReference
     private Criador criador;
 
-    @OneToMany(mappedBy = "video")
+    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @JsonIgnore
     private List<PlaylistVideo> playlistVideos = new ArrayList<>();

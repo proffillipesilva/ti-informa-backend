@@ -17,9 +17,11 @@ public class VideoResponseDto{
     private String titulo;
     private String thumbnail;
     private String descricao;
+    private String url;
     private String categoria;
     private LocalDate dataPublicacao;
     private List<String> palavraChave;
     private String key;
     private Long visualizacoes;
+    private Double avaliacaoMedia;
 }

@@ -46,7 +46,7 @@ public class StorageService  {
     private UsuarioRepository usuarioRepository;
 
     @Transactional
-    public String uploadFile(
+    public Video uploadFile(
             MultipartFile file,
             MultipartFile thumbnail,
             String titulo,
@@ -102,11 +102,9 @@ public class StorageService  {
                     .thumbnail(thumbnailUrl)
                     .criador(criador)
                     .build();
-            log.info("Video a ser salvo: {}", video);
 
             videoRepository.save(video);
-
-            return "File uploaded and video saved with key: " + fileName;
+            return video;
         } finally {
             if (fileObj.exists()) {
                 fileObj.delete();

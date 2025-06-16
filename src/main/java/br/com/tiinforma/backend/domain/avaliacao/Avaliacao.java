@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.avaliacao;
 
+import br.com.tiinforma.backend.domain.UsuarioAvaliacao.UsuarioAvaliacao;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuarioVideoProgresso.UsuarioVideoProgresso;
 import br.com.tiinforma.backend.domain.video.Video;
@@ -8,6 +9,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -41,4 +43,7 @@ public class Avaliacao implements Serializable {
 
     @OneToMany(mappedBy = "avaliacao")
     private List<UsuarioVideoProgresso> progressos;
+
+    @OneToMany(mappedBy = "avaliacao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioAvaliacao> usuarioAvaliacoes;
 }

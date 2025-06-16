@@ -2,6 +2,7 @@ package br.com.tiinforma.backend.controller;
 
 
 
+import br.com.tiinforma.backend.controller.aws.StorageController;
 import br.com.tiinforma.backend.domain.embeddedPk.PlaylistVideoId;
 import br.com.tiinforma.backend.domain.enums.Visibilidade;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
@@ -22,6 +23,8 @@ import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.implementations.PlaylistPaginacaoService;
 import br.com.tiinforma.backend.services.interfaces.PlaylistService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +40,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/playlists")
 @RequiredArgsConstructor
 public class PlaylistController {
+
+    private static final Logger log = LoggerFactory.getLogger(StorageController.class);
 
     @Autowired
     private PlaylistService playlistService;
@@ -129,9 +134,26 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        playlistService.delete(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Playlist playlist = playlistRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist não encontrada"));
+
+        if (!playlist.getUsuario().getId().equals(userDetails.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try {
+            playlistVideoRepository.deleteAll(playlist.getPlaylistVideos());
+            playlistRepository.flush();
+
+            playlistRepository.delete(playlist);
+
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Erro ao deletar playlist", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/search")

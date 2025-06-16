@@ -9,6 +9,7 @@ import br.com.tiinforma.backend.domain.video.VideoResponseDto;
 import br.com.tiinforma.backend.domain.video.VideoUploadDTO;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.repositories.PlaylistVideoRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
@@ -50,6 +51,9 @@ public class StorageController {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private PlaylistVideoRepository playlistVideoRepository;
+
+    @Autowired
     private VideoRepository videoRepository;
 
     @Autowired
@@ -59,7 +63,7 @@ public class StorageController {
     private VideoService videoService;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadVideo(
+    public ResponseEntity<String> uploadVideo(
             @RequestParam("file") MultipartFile file,
             @RequestParam("thumbnail") MultipartFile thumbnail,
             @RequestParam("titulo") String titulo,
@@ -69,10 +73,9 @@ public class StorageController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         log.info("Recebida requisição de upload de vídeo para o usuário: {}", userDetails.getUsername());
-        log.info("Tamanho do thumbnail: {}", thumbnail.getSize());
 
-        List<String> palavraChave = Collections.emptyList();
         try {
+            List<String> palavraChave = Collections.emptyList();
             if (palavra_chave != null) {
                 palavraChave = objectMapper.readValue(palavra_chave, new TypeReference<List<String>>() {});
             }
@@ -90,7 +93,7 @@ public class StorageController {
                     palavraChave
             );
 
-            String response = String.valueOf(storageService.uploadFile(
+            Video video = storageService.uploadFile(
                     dto.getFile(),
                     dto.getThumbnail(),
                     dto.getTitulo(),
@@ -99,13 +102,38 @@ public class StorageController {
                     dto.getDataCadastro(),
                     String.join(",", dto.getPalavraChave()),
                     criador
-            ));
+            );
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            String videoUrl = "/video/" + video.getId();
+            video.setUrl(videoUrl);
+            videoRepository.save(video);
+
+            VideoResponseDto responseDto = convertToResponseDto(video);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("Vídeo enviado com sucesso!");
         } catch (Exception e) {
-            log.error("Erro durante o upload do vídeo: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no upload do vídeo: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro no upload");
         }
+    }
+
+    private VideoResponseDto convertToResponseDto(Video video) {
+        List<String> palavrasChaveList = video.getPalavraChave() != null && !video.getPalavraChave().isEmpty() ?
+                Arrays.asList(video.getPalavraChave().split(",")) :
+                List.of();
+
+        return new VideoResponseDto(
+                video.getId(),
+                video.getTitulo(),
+                video.getThumbnail(),
+                video.getDescricao(),
+                video.getUrl(),
+                video.getCategoria(),
+                video.getDataPublicacao(),
+                palavrasChaveList,
+                video.getKey(),
+                video.getVisualizacoes(),
+                video.getAvaliacaoMedia()
+        );
     }
 
     @GetMapping("/meus-videos")
@@ -162,11 +190,33 @@ public class StorageController {
             @PathVariable Long videoId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        Video video = videoRepository.findById(videoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
+        try {
+            Video video = videoRepository.findById(videoId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
 
-        String mensagem = storageService.deleteFile(video.getKey(), userDetails.getUsername());
-        return ResponseEntity.ok(mensagem);
+            if (!video.getCriador().getEmail().equals(userDetails.getUsername())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para excluir este vídeo");
+            }
+
+            videoService.deletarAvaliacoesDoVideo(videoId);
+
+            playlistVideoRepository.deleteAll(video.getPlaylistVideos());
+            videoRepository.flush();
+
+            storageService.deleteFile(video.getKey(), userDetails.getUsername());
+
+            if (video.getThumbnail() != null && !video.getThumbnail().isEmpty()) {
+                storageService.deleteFile(video.getThumbnail(), userDetails.getUsername());
+            }
+
+            videoRepository.delete(video);
+
+            return ResponseEntity.ok("{\"message\": \"Vídeo excluído com sucesso\"}");
+        } catch (Exception e) {
+            log.error("Erro ao deletar vídeo", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"Erro ao excluir vídeo: " + e.getMessage() + "\"}");
+        }
     }
 
     @GetMapping("/videos-recomendados")
@@ -233,11 +283,13 @@ public class StorageController {
                 video.getTitulo(),
                 video.getThumbnail(),
                 video.getDescricao(),
+                video.getUrl(),
                 video.getCategoria(),
                 video.getDataPublicacao(),
                 palavrasChaveList,
                 video.getKey(),
-                video.getVisualizacoes()
+                video.getVisualizacoes(),
+                video.getAvaliacaoMedia()
         );
     }
 
@@ -258,5 +310,29 @@ public class StorageController {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{videoId}/avaliacao-media")
+    public ResponseEntity<Double> getAvaliacaoMedia(@PathVariable Long videoId) {
+        Double media = videoService.calcularMediaAvaliacoes(videoId);
+
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
+        video.setAvaliacaoMedia(media);
+        videoRepository.save(video);
+
+        return ResponseEntity.ok(media);
+    }
+
+    @GetMapping("/{videoId}")
+    public ResponseEntity<VideoResponseDto> getVideo(@PathVariable Long videoId) {
+        Video video = videoService.buscarVideoPorId(videoId);
+
+        Double media = videoService.calcularMediaAvaliacoes(videoId);
+        video.setAvaliacaoMedia(media);
+        videoRepository.save(video);
+
+        VideoResponseDto responseDto = convertToResponseDto(video);
+        return ResponseEntity.ok(responseDto);
     }
 }

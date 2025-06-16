@@ -58,18 +58,22 @@ public class AvaliacaoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        avaliacaoService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                       @RequestHeader("X-User-Id") Long userId) {
+        avaliacaoService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/usuario/{userId}/video/{videoId}",
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    @GetMapping(value = "/usuario/{userId}/video/{videoId}")
     public ResponseEntity<AvaliacaoModel> findByUsuarioAndVideo(
             @PathVariable Long userId,
             @PathVariable Long videoId) {
 
         AvaliacaoResponseDto dto = avaliacaoService.findByUsuarioAndVideo(userId, videoId);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         AvaliacaoModel model = avaliacaoModelAssembler.toModel(dto);
         return ResponseEntity.ok(model);
     }

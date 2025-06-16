@@ -41,7 +41,7 @@ public class Playlist implements Serializable {
     @JoinColumn(name = "id_criador")
     private Criador criador;
 
-    @OneToMany(mappedBy = "playlist")
+    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<PlaylistVideo> playlistVideos= new ArrayList<>();
+    private List<PlaylistVideo> playlistVideos = new ArrayList<>();
 }
