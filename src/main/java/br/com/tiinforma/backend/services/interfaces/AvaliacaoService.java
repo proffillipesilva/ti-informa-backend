@@ -18,5 +18,5 @@ public interface AvaliacaoService {
 
     void delete(Long id, Long userIdAutenticado);
 
-
+    void atualizarMediaAvaliacoes(Long videoId);
 }

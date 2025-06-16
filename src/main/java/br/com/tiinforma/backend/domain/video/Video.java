@@ -67,4 +67,7 @@ public class Video implements Serializable {
     @Builder.Default
     @JsonIgnore
     private List<UsuarioVideoProgresso> progressos = new ArrayList<>();
+
+    public void setMediaAvaliacao(double media) {
+    }
 }

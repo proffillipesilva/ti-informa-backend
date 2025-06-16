@@ -43,6 +43,9 @@ public class AvaliacaoController {
             consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
     public ResponseEntity<AvaliacaoModel> create(@RequestBody AvaliacaoCreateDto avaliacaoCreateDto) {
         AvaliacaoResponseDto created = avaliacaoService.create(avaliacaoCreateDto);
+
+        avaliacaoService.atualizarMediaAvaliacoes(created.getId());
+
         AvaliacaoModel model = avaliacaoModelAssembler.toModel(created);
         return ResponseEntity.ok(model);
     }

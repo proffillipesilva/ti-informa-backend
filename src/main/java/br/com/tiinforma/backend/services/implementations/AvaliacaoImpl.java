@@ -12,6 +12,7 @@ import br.com.tiinforma.backend.repositories.UsuarioAvaliacaoRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.interfaces.AvaliacaoService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -147,5 +148,24 @@ public class AvaliacaoImpl implements AvaliacaoService {
 
         video.setAvaliacaoMedia(media != null ? media : 0.0);
         videoRepository.save(video);
+    }
+
+    @Override
+    @Transactional
+    public void atualizarMediaAvaliacoes(Long videoId) {
+        List<Avaliacao> avaliacoes = avaliacaoRepository.findByVideoId(videoId);
+
+        if (!avaliacoes.isEmpty()) {
+            double media = avaliacoes.stream()
+                    .mapToDouble(Avaliacao::getNota)
+                    .average()
+                    .orElse(0.0);
+
+            Video video = videoRepository.findById(videoId)
+                    .orElseThrow(() -> new EntityNotFoundException("Vídeo não encontrado"));
+
+            video.setMediaAvaliacao(media);
+            videoRepository.save(video);
+        }
     }
 }

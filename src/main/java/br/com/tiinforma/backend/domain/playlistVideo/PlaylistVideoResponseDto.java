@@ -17,7 +17,9 @@ public class PlaylistVideoResponseDto {
     private String titulo;
     private String videoKey;
     private String videoThumbnail;
+    private String descricao;
     private Integer posicaoVideo;
     private LocalDate dataAdicao;
     private LocalDate dataPublicacao;
+    private Double avaliacaoMedia;
 }

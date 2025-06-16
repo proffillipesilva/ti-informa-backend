@@ -110,9 +110,11 @@ public class PlaylistController {
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
                         pv.getVideo().getThumbnail(),
+                        pv.getVideo().getDescricao(),
                         pv.getPosicaoVideo(),
                         pv.getDataAdicao(),
-                        pv.getVideo().getDataPublicacao()
+                        pv.getVideo().getDataPublicacao(),
+                        pv.getVideo().getAvaliacaoMedia()
                 ))
                 .collect(Collectors.toList());
 
@@ -179,9 +181,11 @@ public class PlaylistController {
                         pv.getVideo().getTitulo(),
                         pv.getVideo().getKey(),
                         pv.getVideo().getThumbnail(),
+                        pv.getVideo().getDescricao(),
                         pv.getPosicaoVideo(),
                         pv.getDataAdicao(),
-                        pv.getVideo().getDataPublicacao()
+                        pv.getVideo().getDataPublicacao(),
+                        pv.getVideo().getAvaliacaoMedia()
                 )).collect(Collectors.toList())
         )).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
@@ -244,9 +248,11 @@ public class PlaylistController {
                                 pv.getVideo().getTitulo(),
                                 pv.getVideo().getKey(),
                                 pv.getVideo().getThumbnail(),
+                                pv.getVideo().getDescricao(),
                                 pv.getPosicaoVideo(),
                                 pv.getDataAdicao(),
-                                pv.getVideo().getDataPublicacao()
+                                pv.getVideo().getDataPublicacao(),
+                                pv.getVideo().getAvaliacaoMedia()
                         ))
                         .collect(Collectors.toList())
         );
@@ -289,9 +295,11 @@ public class PlaylistController {
                                     pv.getVideo().getTitulo(),
                                     pv.getVideo().getKey(),
                                     pv.getVideo().getThumbnail(),
+                                    pv.getVideo().getDescricao(),
                                     pv.getPosicaoVideo(),
                                     pv.getDataAdicao(),
-                                    pv.getVideo().getDataPublicacao()
+                                    pv.getVideo().getDataPublicacao(),
+                                    pv.getVideo().getAvaliacaoMedia()
                             ))
                             .collect(Collectors.toList())
             ));
