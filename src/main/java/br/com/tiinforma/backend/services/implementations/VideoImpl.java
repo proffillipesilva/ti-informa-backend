@@ -136,4 +136,18 @@ public class VideoImpl implements VideoService {
         Double media = videoRepository.calcularMediaAvaliacoes(videoId);
         return media != null ? media : 0.0;
     }
+
+    @Override
+    public List<Video> buscarVideosMaisAvaliados() {
+        return videoRepository.findAll().stream()
+                .filter(v -> v.getAvaliacaoMedia() != null)
+                .sorted((v1, v2) -> Double.compare(v2.getAvaliacaoMedia(), v1.getAvaliacaoMedia()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Video> buscarVideosRecentes() {
+        return videoRepository.findAllOrderByDataPublicacaoDesc();
+    }
+
 }

@@ -335,4 +335,116 @@ public class StorageController {
         VideoResponseDto responseDto = convertToResponseDto(video);
         return ResponseEntity.ok(responseDto);
     }
+
+    @GetMapping("/videos-mais-avaliados/interesses")
+    public ResponseEntity<List<VideoResponseDto>> getTopRatedVideosByInterests(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(userDetails.getUsername());
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Usuario usuario = usuarioOptional.get();
+        List<Video> recommendedVideos = new ArrayList<>();
+
+        String interessesRaw = usuario.getInteresses();
+        List<String> interessesList = null;
+
+        if (interessesRaw != null && !interessesRaw.trim().isEmpty()) {
+            interessesList = Arrays.asList(interessesRaw.split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
+
+        if (interessesList != null && !interessesList.isEmpty()) {
+            recommendedVideos.addAll(videoService.buscarVideosRecomendados(interessesList));
+        }
+
+        List<Video> topRatedVideos = recommendedVideos.stream()
+                .filter(v -> v.getAvaliacaoMedia() != null && v.getAvaliacaoMedia() >= 3.5)
+                .sorted((v1, v2) -> Double.compare(v2.getAvaliacaoMedia(), v1.getAvaliacaoMedia()))
+                .collect(Collectors.toList());
+
+        List<VideoResponseDto> dtos = topRatedVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/videos-mais-avaliados/populares")
+    public ResponseEntity<List<VideoResponseDto>> getTopRatedPopularVideos() {
+        List<Video> popularVideos = videoService.buscarVideosPopulares();
+
+        List<Video> topRatedVideos = popularVideos.stream()
+                .filter(v -> v.getAvaliacaoMedia() != null && v.getAvaliacaoMedia() >= 3.5)
+                .sorted((v1, v2) -> Double.compare(v2.getAvaliacaoMedia(), v1.getAvaliacaoMedia()))
+                .collect(Collectors.toList());
+
+        List<VideoResponseDto> dtos = topRatedVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/videos-recentes/interesses")
+    public ResponseEntity<List<VideoResponseDto>> getRecentVideosByInterests(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(userDetails.getUsername());
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Usuario usuario = usuarioOptional.get();
+        List<Video> recommendedVideos = new ArrayList<>();
+
+        String interessesRaw = usuario.getInteresses();
+        List<String> interessesList = null;
+
+        if (interessesRaw != null && !interessesRaw.trim().isEmpty()) {
+            interessesList = Arrays.asList(interessesRaw.split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
+
+        if (interessesList != null && !interessesList.isEmpty()) {
+            recommendedVideos.addAll(videoService.buscarVideosRecomendados(interessesList));
+        }
+
+        List<Video> recentVideos = recommendedVideos.stream()
+                .sorted((v1, v2) -> v2.getDataPublicacao().compareTo(v1.getDataPublicacao()))
+                .collect(Collectors.toList());
+
+        List<VideoResponseDto> dtos = recentVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/videos-recentes/populares")
+    public ResponseEntity<List<VideoResponseDto>> getRecentPopularVideos() {
+        List<Video> popularVideos = videoService.buscarVideosPopulares();
+
+        List<Video> recentVideos = popularVideos.stream()
+                .sorted((v1, v2) -> v2.getDataPublicacao().compareTo(v1.getDataPublicacao()))
+                .collect(Collectors.toList());
+
+        List<VideoResponseDto> dtos = recentVideos.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
 }
