@@ -4,6 +4,7 @@ import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import br.com.tiinforma.backend.domain.enums.Funcao;
+import br.com.tiinforma.backend.domain.inscricao.InscricaoRequestDto;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
@@ -109,5 +110,26 @@ public class CriadorImpl implements CriadorService {
         return modelMapper.map(criador, CriadorResponseDto.class);
     }
 
+    @Override
+    public CriadorResponseDto gerenciarInscricao(InscricaoRequestDto request) {
+        Criador criador = criadorRepository.findById(request.getCriadorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"));
+
+        if (request.isInscrever()) {
+            criador.setTotalInscritos(criador.getTotalInscritos() + 1);
+        } else {
+            criador.setTotalInscritos(Math.max(0, criador.getTotalInscritos() - 1));
+        }
+
+        criadorRepository.save(criador);
+        return modelMapper.map(criador, CriadorResponseDto.class);
+    }
+
+    @Override
+    public Integer getTotalInscritos(Long criadorId) {
+        return criadorRepository.findById(criadorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"))
+                .getTotalInscritos();
+    }
 
 }

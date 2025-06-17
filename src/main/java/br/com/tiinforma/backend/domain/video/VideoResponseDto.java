@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.video;
 
+import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,5 @@ public class VideoResponseDto{
     private String key;
     private Long visualizacoes;
     private Double avaliacaoMedia;
+    private CriadorResponseDto criador;
 }

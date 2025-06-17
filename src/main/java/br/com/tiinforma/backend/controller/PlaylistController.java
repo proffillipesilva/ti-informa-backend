@@ -3,6 +3,7 @@ package br.com.tiinforma.backend.controller;
 
 
 import br.com.tiinforma.backend.controller.aws.StorageController;
+import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import br.com.tiinforma.backend.domain.embeddedPk.PlaylistVideoId;
 import br.com.tiinforma.backend.domain.enums.Visibilidade;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
@@ -105,17 +106,29 @@ public class PlaylistController {
 
         List<PlaylistVideoResponseDto> videos = playlist.getPlaylistVideos().stream()
                 .sorted(Comparator.comparing(PlaylistVideo::getPosicaoVideo))
-                .map(pv -> new PlaylistVideoResponseDto(
-                        pv.getVideo().getId(),
-                        pv.getVideo().getTitulo(),
-                        pv.getVideo().getKey(),
-                        pv.getVideo().getThumbnail(),
-                        pv.getVideo().getDescricao(),
-                        pv.getPosicaoVideo(),
-                        pv.getDataAdicao(),
-                        pv.getVideo().getDataPublicacao(),
-                        pv.getVideo().getAvaliacaoMedia()
-                ))
+                .map(pv -> {
+                    Video video = pv.getVideo();
+                    return new PlaylistVideoResponseDto(
+                            video.getId(),
+                            video.getTitulo(),
+                            video.getKey(),
+                            video.getThumbnail(),
+                            video.getDescricao(),
+                            pv.getPosicaoVideo(),
+                            pv.getDataAdicao(),
+                            video.getDataPublicacao(),
+                            video.getAvaliacaoMedia(),
+                            video.getCriador() != null ?
+                                    new CriadorResponseDto(
+                                            video.getCriador().getId(),
+                                            video.getCriador().getNome(),
+                                            video.getCriador().getEmail(),
+                                            video.getCriador().getFormacao(),
+                                            video.getCriador().getFuncao(),
+                                            video.getCriador().getTotalInscritos()
+                                    ) : null
+                    );
+                })
                 .collect(Collectors.toList());
 
         PlaylistResponseDto dto = new PlaylistResponseDto(
@@ -170,24 +183,42 @@ public class PlaylistController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não encontrado.");
         }
         List<Playlist> playlists = playlistRepository.findByUsuario(usuario);
-        List<PlaylistResponseDto> dtos = playlists.stream().map(playlist -> new PlaylistResponseDto(
-                playlist.getId(),
-                usuario.getId(),
-                playlist.getCriador() != null ? playlist.getCriador().getId() : null,
-                playlist.getNome(),
-                playlist.getVisibilidade(),
-                playlist.getPlaylistVideos().stream().map(pv -> new PlaylistVideoResponseDto(
-                        pv.getVideo().getId(),
-                        pv.getVideo().getTitulo(),
-                        pv.getVideo().getKey(),
-                        pv.getVideo().getThumbnail(),
-                        pv.getVideo().getDescricao(),
-                        pv.getPosicaoVideo(),
-                        pv.getDataAdicao(),
-                        pv.getVideo().getDataPublicacao(),
-                        pv.getVideo().getAvaliacaoMedia()
-                )).collect(Collectors.toList())
-        )).collect(Collectors.toList());
+        List<PlaylistResponseDto> dtos = playlists.stream().map(playlist -> {
+            List<PlaylistVideoResponseDto> videoDtos = playlist.getPlaylistVideos().stream()
+                    .map(pv -> {
+                        Video video = pv.getVideo();
+                        return new PlaylistVideoResponseDto(
+                                video.getId(),
+                                video.getTitulo(),
+                                video.getKey(),
+                                video.getThumbnail(),
+                                video.getDescricao(),
+                                pv.getPosicaoVideo(),
+                                pv.getDataAdicao(),
+                                video.getDataPublicacao(),
+                                video.getAvaliacaoMedia(),
+                                video.getCriador() != null ?
+                                        new CriadorResponseDto(
+                                                video.getCriador().getId(),
+                                                video.getCriador().getNome(),
+                                                video.getCriador().getEmail(),
+                                                video.getCriador().getFormacao(),
+                                                video.getCriador().getFuncao(),
+                                                video.getCriador().getTotalInscritos()
+                                        ) : null
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            return new PlaylistResponseDto(
+                    playlist.getId(),
+                    usuario.getId(),
+                    playlist.getCriador() != null ? playlist.getCriador().getId() : null,
+                    playlist.getNome(),
+                    playlist.getVisibilidade(),
+                    videoDtos
+            );
+        }).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
@@ -207,11 +238,11 @@ public class PlaylistController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não tem permissão para modificar esta playlist.");
         }
 
-        Optional<Video> videoOpt = videoRepository.findById(videoId);
-        if (videoOpt.isEmpty()) {
+        Optional<Video> videoOptional = videoRepository.findById(videoId);
+        if (videoOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vídeo não encontrado.");
         }
-        Video video = videoOpt.get();
+        Video videoParaAdicionar = videoOptional.get();
 
         boolean videoJaExiste = playlist.getPlaylistVideos().stream()
                 .anyMatch(pv -> pv.getVideo().getId().equals(videoId));
@@ -228,7 +259,7 @@ public class PlaylistController {
         PlaylistVideo playlistVideo = PlaylistVideo.builder()
                 .id(new PlaylistVideoId(playlistId, videoId))
                 .playlist(playlist)
-                .video(video)
+                .video(videoParaAdicionar)
                 .posicaoVideo(proximaPosicao)
                 .dataAdicao(java.time.LocalDate.now())
                 .build();
@@ -243,22 +274,35 @@ public class PlaylistController {
                 playlist.getNome(),
                 playlist.getVisibilidade(),
                 playlist.getPlaylistVideos().stream()
-                        .map(pv -> new PlaylistVideoResponseDto(
-                                pv.getVideo().getId(),
-                                pv.getVideo().getTitulo(),
-                                pv.getVideo().getKey(),
-                                pv.getVideo().getThumbnail(),
-                                pv.getVideo().getDescricao(),
-                                pv.getPosicaoVideo(),
-                                pv.getDataAdicao(),
-                                pv.getVideo().getDataPublicacao(),
-                                pv.getVideo().getAvaliacaoMedia()
-                        ))
+                        .map(pv -> {
+                            Video v = pv.getVideo(); // Variável renomeada
+                            return new PlaylistVideoResponseDto(
+                                    v.getId(),
+                                    v.getTitulo(),
+                                    v.getKey(),
+                                    v.getThumbnail(),
+                                    v.getDescricao(),
+                                    pv.getPosicaoVideo(),
+                                    pv.getDataAdicao(),
+                                    v.getDataPublicacao(),
+                                    v.getAvaliacaoMedia(),
+                                    v.getCriador() != null ?
+                                            new CriadorResponseDto(
+                                                    v.getCriador().getId(),
+                                                    v.getCriador().getNome(),
+                                                    v.getCriador().getEmail(),
+                                                    v.getCriador().getFormacao(),
+                                                    v.getCriador().getFuncao(),
+                                                    v.getCriador().getTotalInscritos()
+                                            ) : null
+                            );
+                        })
                         .collect(Collectors.toList())
         );
 
         return ResponseEntity.ok(responseDto);
     }
+
 
     @PatchMapping("/{id}/visibilidade")
     public ResponseEntity<PlaylistResponseDto> updateVisibilidade(
@@ -290,22 +334,33 @@ public class PlaylistController {
                     playlist.getNome(),
                     playlist.getVisibilidade(),
                     playlist.getPlaylistVideos().stream()
-                            .map(pv -> new PlaylistVideoResponseDto(
-                                    pv.getVideo().getId(),
-                                    pv.getVideo().getTitulo(),
-                                    pv.getVideo().getKey(),
-                                    pv.getVideo().getThumbnail(),
-                                    pv.getVideo().getDescricao(),
-                                    pv.getPosicaoVideo(),
-                                    pv.getDataAdicao(),
-                                    pv.getVideo().getDataPublicacao(),
-                                    pv.getVideo().getAvaliacaoMedia()
-                            ))
+                            .map(pv -> {
+                                Video video = pv.getVideo();
+                                return new PlaylistVideoResponseDto(
+                                        video.getId(),
+                                        video.getTitulo(),
+                                        video.getKey(),
+                                        video.getThumbnail(),
+                                        video.getDescricao(),
+                                        pv.getPosicaoVideo(),
+                                        pv.getDataAdicao(),
+                                        video.getDataPublicacao(),
+                                        video.getAvaliacaoMedia(),
+                                        video.getCriador() != null ?
+                                                new CriadorResponseDto(
+                                                        video.getCriador().getId(),
+                                                        video.getCriador().getNome(),
+                                                        video.getCriador().getEmail(),
+                                                        video.getCriador().getFormacao(),
+                                                        video.getCriador().getFuncao(),
+                                                        video.getCriador().getTotalInscritos()
+                                                ) : null
+                                );
+                            })
                             .collect(Collectors.toList())
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
-
 }

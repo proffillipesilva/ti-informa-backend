@@ -38,6 +38,10 @@ public class Criador implements Serializable, FotoAtualizavel {
 
     private String formacao;
 
+    @Column(name = "total_inscritos")
+    @Builder.Default
+    private Integer totalInscritos = 0;
+
     private Funcao funcao = Funcao.CRIADOR;
 
     private String fotoUrl;
