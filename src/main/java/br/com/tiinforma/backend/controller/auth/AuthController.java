@@ -270,6 +270,7 @@ public class AuthController {
         response.put("nome", usuario.getNome());
         response.put("email", usuario.getEmail());
         response.put("funcao", usuario.getFuncao().name());
+        response.put("descricao", usuario.getDescricao() != null ? usuario.getDescricao() : "");
         response.put("isAdmin", usuario.getFuncao().equals(Funcao.ADMINISTRADOR));
         response.put("isCriador", usuario.getFuncao().equals(Funcao.CRIADOR));
 

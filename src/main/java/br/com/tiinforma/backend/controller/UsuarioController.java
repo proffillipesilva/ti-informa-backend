@@ -3,10 +3,7 @@ package br.com.tiinforma.backend.controller;
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
-import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
-import br.com.tiinforma.backend.domain.usuario.UsuarioModel;
-import br.com.tiinforma.backend.domain.usuario.UsuarioModelAssembler;
-import br.com.tiinforma.backend.domain.usuario.UsuarioResponseDto;
+import br.com.tiinforma.backend.domain.usuario.*;
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorCreateDto;
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorResponseDto;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
@@ -141,4 +138,12 @@ public class UsuarioController {
     public ResponseEntity<?> reprovarCriador(@PathVariable Long id) {
         return usuarioService.reprovarCriador(id);
     }
+
+    @PutMapping("/descricao")
+    public ResponseEntity<Void> atualizarDescricao(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                   @RequestBody UsuarioDescricaoDto dto) {
+        usuarioService.atualizarDescricao(userDetails.getId(), dto.getDescricao());
+        return ResponseEntity.ok().build();
+    }
+
 }

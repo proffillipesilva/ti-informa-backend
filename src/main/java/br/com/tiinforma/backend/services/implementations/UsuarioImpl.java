@@ -198,5 +198,12 @@ public class UsuarioImpl implements UsuarioService {
         }
     }
 
+    @Override
+    public void atualizarDescricao(Long id, String descricao) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
+        usuario.setDescricao(descricao);
+        usuarioRepository.save(usuario);
+    }
 
 }

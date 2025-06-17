@@ -42,4 +42,6 @@ public interface UsuarioService {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     ResponseEntity<?> reprovarCriador(Long id);
 
+    void atualizarDescricao(Long id, String descricao);
+
 }

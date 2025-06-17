@@ -15,5 +15,7 @@ public class UsuarioModel extends RepresentationModel<UsuarioModel> {
     private String email;
     private String interesses;
     private Funcao funcao;
+    private String descricao;
+
 
 }
