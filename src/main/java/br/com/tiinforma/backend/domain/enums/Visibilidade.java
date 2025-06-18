@@ -3,7 +3,8 @@ package br.com.tiinforma.backend.domain.enums;
 public enum Visibilidade {
     PUBLICA(0,"PUBLICA"),
     NAO_LISTADA(1, "NÃO LISTADA"),
-    PRIVADA(2, "PRIVADA");
+    PRIVADA(2, "PRIVADA"),
+    privada(3, "privada");
 
     private Integer codigo;
     private String descricao;
