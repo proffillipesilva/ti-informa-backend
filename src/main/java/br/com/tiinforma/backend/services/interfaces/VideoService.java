@@ -18,4 +18,12 @@ public interface VideoService {
     void deletarVideo(Long videoId, String username);
 
     Video buscarVideoPorId(Long videoId);
+
+    void deletarAvaliacoesDoVideo(Long videoId);
+
+    Double calcularMediaAvaliacoes(Long videoId);
+
+    List<Video> buscarVideosMaisAvaliados();
+
+    List<Video> buscarVideosRecentes();
 }

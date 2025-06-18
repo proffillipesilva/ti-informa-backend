@@ -43,6 +43,9 @@ public class AvaliacaoController {
             consumes = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
     public ResponseEntity<AvaliacaoModel> create(@RequestBody AvaliacaoCreateDto avaliacaoCreateDto) {
         AvaliacaoResponseDto created = avaliacaoService.create(avaliacaoCreateDto);
+
+        avaliacaoService.atualizarMediaAvaliacoes(created.getId());
+
         AvaliacaoModel model = avaliacaoModelAssembler.toModel(created);
         return ResponseEntity.ok(model);
     }
@@ -58,18 +61,22 @@ public class AvaliacaoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        avaliacaoService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                       @RequestHeader("X-User-Id") Long userId) {
+        avaliacaoService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/usuario/{userId}/video/{videoId}",
-            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, "application/x-yml"})
+    @GetMapping(value = "/usuario/{userId}/video/{videoId}")
     public ResponseEntity<AvaliacaoModel> findByUsuarioAndVideo(
             @PathVariable Long userId,
             @PathVariable Long videoId) {
 
         AvaliacaoResponseDto dto = avaliacaoService.findByUsuarioAndVideo(userId, videoId);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         AvaliacaoModel model = avaliacaoModelAssembler.toModel(dto);
         return ResponseEntity.ok(model);
     }

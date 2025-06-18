@@ -19,4 +19,5 @@ public class UsuarioResponseDto {
     private Funcao funcao;
     private String pergunta;
     private String resposta;
+    private String descricao;
 }

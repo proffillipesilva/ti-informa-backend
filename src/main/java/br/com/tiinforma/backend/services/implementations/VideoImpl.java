@@ -1,8 +1,12 @@
 package br.com.tiinforma.backend.services.implementations;
 
+import br.com.tiinforma.backend.domain.UsuarioAvaliacao.UsuarioAvaliacao;
+import br.com.tiinforma.backend.domain.avaliacao.Avaliacao;
 import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.repositories.AvaliacaoRepository;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.repositories.UsuarioAvaliacaoRepository;
 import br.com.tiinforma.backend.repositories.VideoRepository;
 import br.com.tiinforma.backend.services.aws.StorageService;
 import br.com.tiinforma.backend.services.interfaces.VideoService;
@@ -28,6 +32,13 @@ public class VideoImpl implements VideoService {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private AvaliacaoRepository avaliacaoRepository;
+
+    @Autowired
+    private UsuarioAvaliacaoRepository usuarioAvaliacaoRepository;
+
 
     @Override
     public List<Video> buscarVideosPorCriador(Long criadorId) {
@@ -78,6 +89,16 @@ public class VideoImpl implements VideoService {
 
     @Override
     @Transactional
+    public void deletarAvaliacoesDoVideo(Long videoId) {
+        List<UsuarioAvaliacao> usuarioAvaliacoes = usuarioAvaliacaoRepository.findByVideoId(videoId);
+        usuarioAvaliacaoRepository.deleteAll(usuarioAvaliacoes);
+
+        List<Avaliacao> avaliacoes = avaliacaoRepository.findByVideoId(videoId);
+        avaliacaoRepository.deleteAll(avaliacoes);
+    }
+
+    @Override
+    @Transactional
     public void deletarVideo(Long videoId, String username) {
         Video video = videoRepository.findById(videoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
@@ -87,6 +108,8 @@ public class VideoImpl implements VideoService {
         }
 
         try {
+            deletarAvaliacoesDoVideo(videoId);
+
             video.getPlaylistVideos().clear();
             videoRepository.saveAndFlush(video);
 
@@ -107,4 +130,24 @@ public class VideoImpl implements VideoService {
         return videoRepository.findById(videoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vídeo não encontrado"));
     }
+
+    @Override
+    public Double calcularMediaAvaliacoes(Long videoId) {
+        Double media = videoRepository.calcularMediaAvaliacoes(videoId);
+        return media != null ? media : 0.0;
+    }
+
+    @Override
+    public List<Video> buscarVideosMaisAvaliados() {
+        return videoRepository.findAll().stream()
+                .filter(v -> v.getAvaliacaoMedia() != null)
+                .sorted((v1, v2) -> Double.compare(v2.getAvaliacaoMedia(), v1.getAvaliacaoMedia()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Video> buscarVideosRecentes() {
+        return videoRepository.findAllOrderByDataPublicacaoDesc();
+    }
+
 }

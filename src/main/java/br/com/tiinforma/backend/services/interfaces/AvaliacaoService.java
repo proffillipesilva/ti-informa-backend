@@ -16,6 +16,7 @@ public interface AvaliacaoService {
 
     AvaliacaoCreateDto update(AvaliacaoCreateDto avaliacaoCreateDto);
 
-    void delete(Long id);
+    void delete(Long id, Long userIdAutenticado);
 
+    void atualizarMediaAvaliacoes(Long videoId);
 }

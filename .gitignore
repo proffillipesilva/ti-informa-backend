@@ -34,3 +34,6 @@ build/
 
 backend/.env.backend
 .env
+
+firebase.json
+firebase_pre.json

@@ -16,4 +16,5 @@ public class CriadorResponseDto {
     private String email;
     private String formacao;
     private Funcao funcao;
+    private Integer totalInscritos;
 }
