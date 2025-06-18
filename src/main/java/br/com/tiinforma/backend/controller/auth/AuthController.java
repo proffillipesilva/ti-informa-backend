@@ -274,6 +274,7 @@ public class AuthController {
             if (criadorOptional.isPresent()) {
                 Criador criador = criadorOptional.get();
                 return ResponseEntity.ok(Map.of(
+                        "id", usuario.getId(),
                         "nome", criador.getNome(),
                         "email", criador.getEmail(),
                         "isCriador", true,
@@ -286,6 +287,7 @@ public class AuthController {
             }
         } else if (usuario.getFuncao().equals(Funcao.ADMINISTRADOR)) {
             return ResponseEntity.ok(Map.of(
+                    "id", usuario.getId(),
                     "nome", usuario.getNome(),
                     "email", usuario.getEmail(),
                     "isCriador", false,
@@ -296,6 +298,7 @@ public class AuthController {
             ));
         } else {
             return ResponseEntity.ok(Map.of(
+                    "id", usuario.getId(),
                     "nome", usuario.getNome(),
                     "email", usuario.getEmail(),
                     "isCriador", false,
