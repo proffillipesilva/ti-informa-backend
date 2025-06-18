@@ -2,6 +2,7 @@ package br.com.tiinforma.backend.controller;
 
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
+import br.com.tiinforma.backend.domain.inscricao.InscricaoRequestDto;
 import br.com.tiinforma.backend.services.interfaces.CriadorService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,4 +53,17 @@ public class CriadorController {
         }
     }
 
-}
+        @PostMapping("/inscricao")
+        public ResponseEntity<CriadorResponseDto> gerenciarInscricao(@RequestBody InscricaoRequestDto request) {
+            CriadorResponseDto criador = criadorService.gerenciarInscricao(request);
+            return ResponseEntity.ok(criador);
+        }
+
+        @GetMapping("/{id}/inscritos")
+        public ResponseEntity<Integer> getTotalInscritos(@PathVariable Long id) {
+            Integer totalInscritos = criadorService.getTotalInscritos(id);
+            return ResponseEntity.ok(totalInscritos);
+        }
+    }
+
+

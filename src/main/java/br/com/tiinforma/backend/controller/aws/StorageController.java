@@ -1,6 +1,7 @@
 package br.com.tiinforma.backend.controller.aws;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
+import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
@@ -132,7 +133,15 @@ public class StorageController {
                 palavrasChaveList,
                 video.getKey(),
                 video.getVisualizacoes(),
-                video.getAvaliacaoMedia()
+                video.getAvaliacaoMedia(),
+                new CriadorResponseDto(
+                        video.getCriador().getId(),
+                        video.getCriador().getNome(),
+                        video.getCriador().getEmail(),
+                        video.getCriador().getFormacao(),
+                        video.getCriador().getFuncao(),
+                        video.getCriador().getTotalInscritos()
+                )
         );
     }
 
@@ -289,7 +298,15 @@ public class StorageController {
                 palavrasChaveList,
                 video.getKey(),
                 video.getVisualizacoes(),
-                video.getAvaliacaoMedia()
+                video.getAvaliacaoMedia(),
+                new CriadorResponseDto(
+                        video.getCriador().getId(),
+                        video.getCriador().getNome(),
+                        video.getCriador().getEmail(),
+                        video.getCriador().getFormacao(),
+                        video.getCriador().getFuncao(),
+                        video.getCriador().getTotalInscritos()
+                )
         );
     }
 

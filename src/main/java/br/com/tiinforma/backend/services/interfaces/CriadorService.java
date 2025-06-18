@@ -2,6 +2,8 @@ package br.com.tiinforma.backend.services.interfaces;
 
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
+import br.com.tiinforma.backend.domain.inscricao.InscricaoRequestDto;
+
 import java.util.List;
 
 public interface CriadorService {
@@ -14,4 +16,8 @@ public interface CriadorService {
     void delete(Long id);
 
     CriadorResponseDto promoverParaCriador(Long id,String cpf, String formacao);
+
+    CriadorResponseDto gerenciarInscricao(InscricaoRequestDto request);
+
+    Integer getTotalInscritos(Long criadorId);
 }

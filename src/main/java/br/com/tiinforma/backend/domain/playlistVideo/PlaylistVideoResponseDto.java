@@ -1,5 +1,6 @@
 package br.com.tiinforma.backend.domain.playlistVideo;
 
+import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +23,5 @@ public class PlaylistVideoResponseDto {
     private LocalDate dataAdicao;
     private LocalDate dataPublicacao;
     private Double avaliacaoMedia;
+    private CriadorResponseDto criador;
 }
