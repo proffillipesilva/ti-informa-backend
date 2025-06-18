@@ -38,7 +38,7 @@ public class FirebaseConfig {
 
         File file = new File(filePath);
         // Fix for beanstalk (since it replaces \n for n)
-        content = content.replaceAll("@", "\n");
+        content = content.replaceAll("#", "\n");
         // Create parent directories if they don't exist
         File parent = file.getParentFile();
         if (parent != null) {
