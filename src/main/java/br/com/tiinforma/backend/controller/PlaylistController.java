@@ -3,8 +3,10 @@ package br.com.tiinforma.backend.controller;
 
 
 import br.com.tiinforma.backend.controller.aws.StorageController;
+import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import br.com.tiinforma.backend.domain.embeddedPk.PlaylistVideoId;
+import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.enums.Visibilidade;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
 import br.com.tiinforma.backend.domain.playlist.PlaylistAddVideosDto;
@@ -17,13 +19,11 @@ import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
-import br.com.tiinforma.backend.repositories.PlaylistRepository;
-import br.com.tiinforma.backend.repositories.PlaylistVideoRepository;
-import br.com.tiinforma.backend.repositories.UsuarioRepository;
-import br.com.tiinforma.backend.repositories.VideoRepository;
+import br.com.tiinforma.backend.repositories.*;
 import br.com.tiinforma.backend.services.implementations.PlaylistPaginacaoService;
 import br.com.tiinforma.backend.services.interfaces.PlaylistService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +62,13 @@ public class PlaylistController {
     @Autowired
     private PlaylistVideoRepository playlistVideoRepository;
 
+    @Autowired
+    private CriadorRepository criadorRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+
     @PostMapping("/criar")
     public ResponseEntity<?> criarPlaylist(
             @RequestBody Map<String, String> body,
@@ -69,28 +76,48 @@ public class PlaylistController {
     ) {
         String nome = body.get("nome");
         String visibilidadeStr = body.get("visibilidade");
+        String criadorIdStr = body.get("criadorId");
+
         if (nome == null || visibilidadeStr == null) {
             return ResponseEntity.badRequest().body("Nome e visibilidade são obrigatórios.");
         }
+
         Visibilidade visibilidade = Visibilidade.valueOf(visibilidadeStr);
         Usuario usuario = usuarioRepository.findById(userDetails.getId()).orElse(null);
+
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário não encontrado.");
         }
+
         Playlist playlist = Playlist.builder()
                 .nome(nome)
                 .visibilidade(visibilidade)
                 .usuario(usuario)
                 .build();
+
+        if (criadorIdStr != null && !criadorIdStr.isEmpty()) {
+            try {
+                Long criadorId = Long.parseLong(criadorIdStr);
+                Criador criador = criadorRepository.findById(criadorId).orElse(null);
+
+                if (criador != null) {
+                    playlist.setCriador(criador);
+                }
+            } catch (NumberFormatException e) {
+            }
+        }
+
         playlistRepository.save(playlist);
+
         PlaylistCreateDto dto = new PlaylistCreateDto(
                 playlist.getId(),
                 usuario.getId(),
-                null,
+                playlist.getCriador() != null ? playlist.getCriador().getId() : null,
                 playlist.getNome(),
                 playlist.getVisibilidade(),
                 List.of()
         );
+
         return ResponseEntity.ok(dto);
     }
 
@@ -137,6 +164,7 @@ public class PlaylistController {
                 playlist.getCriador() != null ? playlist.getCriador().getId() : null,
                 playlist.getNome(),
                 playlist.getVisibilidade(),
+                "usuario",
                 videos
         );
 
@@ -216,6 +244,7 @@ public class PlaylistController {
                     playlist.getCriador() != null ? playlist.getCriador().getId() : null,
                     playlist.getNome(),
                     playlist.getVisibilidade(),
+                    "usuario",
                     videoDtos
             );
         }).collect(Collectors.toList());
@@ -273,6 +302,7 @@ public class PlaylistController {
                 playlist.getCriador() != null ? playlist.getCriador().getId() : null,
                 playlist.getNome(),
                 playlist.getVisibilidade(),
+                "usuario",
                 playlist.getPlaylistVideos().stream()
                         .map(pv -> {
                             Video v = pv.getVideo(); // Variável renomeada
@@ -333,6 +363,7 @@ public class PlaylistController {
                     playlist.getCriador() != null ? playlist.getCriador().getId() : null,
                     playlist.getNome(),
                     playlist.getVisibilidade(),
+                    "usuario",
                     playlist.getPlaylistVideos().stream()
                             .map(pv -> {
                                 Video video = pv.getVideo();
@@ -362,5 +393,77 @@ public class PlaylistController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/usuario/{userId}")
+    public ResponseEntity<List<PlaylistResponseDto>> getPlaylistsByUser(@PathVariable Long userId) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(userId);
+
+        if (usuarioOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Usuario usuario = usuarioOptional.get();
+
+        List<Playlist> playlistsDoUsuario = playlistRepository.findByUsuarioId(userId);
+
+        List<Playlist> playlistsDoCriador = new ArrayList<>();
+
+        Optional<Criador> criadorOptional = criadorRepository.findByUsuarioId(userId);
+        if (criadorOptional.isPresent()) {
+            playlistsDoCriador = playlistRepository.findByCriadorId(criadorOptional.get().getId());
+        }
+
+        Set<Playlist> todasPlaylists = new HashSet<>();
+        todasPlaylists.addAll(playlistsDoUsuario);
+        todasPlaylists.addAll(playlistsDoCriador);
+
+        List<PlaylistResponseDto> response = todasPlaylists.stream()
+                .map(playlist -> {
+                    String donoDaPlaylist = playlist.getUsuario().getId().equals(userId) ?
+                            "usuario" : "criador";
+
+                    List<PlaylistVideoResponseDto> videos = playlist.getPlaylistVideos().stream()
+                            .sorted(Comparator.comparing(PlaylistVideo::getPosicaoVideo))
+                            .map(this::mapToPlaylistVideoDto)
+                            .collect(Collectors.toList());
+
+                    return new PlaylistResponseDto(
+                            playlist.getId(),
+                            playlist.getUsuario().getId(),
+                            playlist.getCriador() != null ? playlist.getCriador().getId() : null,
+                            playlist.getNome(),
+                            playlist.getVisibilidade(),
+                            donoDaPlaylist,
+                            videos
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    private PlaylistVideoResponseDto mapToPlaylistVideoDto(PlaylistVideo pv) {
+        Video video = pv.getVideo();
+        return new PlaylistVideoResponseDto(
+                video.getId(),
+                video.getTitulo(),
+                video.getKey(),
+                video.getThumbnail(),
+                video.getDescricao(),
+                pv.getPosicaoVideo(),
+                pv.getDataAdicao(),
+                video.getDataPublicacao(),
+                video.getAvaliacaoMedia(),
+                video.getCriador() != null ?
+                        new CriadorResponseDto(
+                                video.getCriador().getId(),
+                                video.getCriador().getNome(),
+                                video.getCriador().getEmail(),
+                                video.getCriador().getFormacao(),
+                                video.getCriador().getFuncao(),
+                                video.getCriador().getTotalInscritos()
+                        ) : null
+        );
     }
 }

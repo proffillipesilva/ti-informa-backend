@@ -18,6 +18,7 @@ import br.com.tiinforma.backend.services.interfaces.VideoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class StorageController {
 
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadVideo(
@@ -151,8 +155,14 @@ public class StorageController {
         try {
             Criador criador = criadorRepository.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Criador não encontrado"));
+
             List<Video> videos = videoRepository.findByCriadorId(criador.getId());
-            return ResponseEntity.ok(videos);
+
+            List<VideoResponseDto> response = videos.stream()
+                    .map(this::convertToResponseDto)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar vídeos");
         }
@@ -463,5 +473,14 @@ public class StorageController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/criador/{criadorId}/videos")
+    public ResponseEntity<List<VideoResponseDto>> getVideosByCriador(@PathVariable Long criadorId) {
+        List<Video> videos = videoRepository.findByCriadorId(criadorId);
+        List<VideoResponseDto> response = videos.stream()
+                .map(video -> modelMapper.map(video, VideoResponseDto.class))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 }

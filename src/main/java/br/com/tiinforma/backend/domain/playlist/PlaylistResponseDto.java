@@ -19,5 +19,6 @@ public class PlaylistResponseDto {
     private Long criadorId;
     private String nome;
     private Visibilidade visibilidade;
+    private String donoDaPlaylist;
     private List<PlaylistVideoResponseDto> videos;
 }

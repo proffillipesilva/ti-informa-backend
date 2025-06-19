@@ -1,6 +1,7 @@
 package br.com.tiinforma.backend.domain.usuario;
 
 import br.com.tiinforma.backend.domain.assinatura.Assinatura;
+import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.usuarioVideoProgresso.UsuarioVideoProgresso;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
@@ -46,6 +47,9 @@ public class Usuario implements Serializable, FotoAtualizavel {
     private String fotoUrl;
 
     private String descricao;
+
+    @OneToOne(mappedBy = "usuario")
+    private Criador criador;
 
     @Column(name = "cadastro_completo", nullable = false, columnDefinition = "boolean default false")
     private boolean cadastroCompleto = false;

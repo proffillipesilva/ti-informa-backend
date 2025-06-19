@@ -12,5 +12,7 @@ import java.util.List;
 public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     Page<Playlist> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
     List<Playlist> findByUsuario(Usuario usuario);
+    List<Playlist> findByUsuarioId(Long usuarioId);
+    List<Playlist> findByCriadorId(Long criadorId);
 
 }
