@@ -6,6 +6,8 @@ import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.*;
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorCreateDto;
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorResponseDto;
+import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +18,22 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -145,5 +156,55 @@ public class UsuarioController {
         usuarioService.atualizarDescricao(userDetails.getId(), dto.getDescricao());
         return ResponseEntity.ok().build();
     }
+    @PutMapping("/foto")
+
+    public ResponseEntity<?> atualizarFoto(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                           @RequestBody Map<String, String> body) {
+        String novaFotoUrl = body.get("fotoUrl");
+
+        System.out.println("Nova foto URL recebida: " + novaFotoUrl);
+
+        if (novaFotoUrl == null || novaFotoUrl.length() > 500) {
+            return ResponseEntity.badRequest().body("A URL da foto é inválida ou muito longa.");
+        }
+
+        Usuario usuario = usuarioRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
+        usuario.setFotoUrl(novaFotoUrl);
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok("Foto de perfil atualizada com sucesso.");
+    }
+
+    @PostMapping("/foto-upload")
+    public ResponseEntity<?> uploadFoto(@RequestParam("file") MultipartFile file,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("Arquivo vazio.");
+            }
+
+            // Exemplo: salvar em diretório local ou serviço (use o S3 ou Firebase se desejar)
+            String nomeArquivo = UUID.randomUUID() + "-" + file.getOriginalFilename();
+            Path caminho = Paths.get("uploads/fotos/" + nomeArquivo);
+            Files.copy(file.getInputStream(), caminho);
+
+            String urlFinal = "http://localhost:5000/uploads/fotos/" + nomeArquivo;
+
+            Usuario usuario = usuarioRepository.findById(userDetails.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
+            usuario.setFotoUrl(urlFinal);
+            usuarioRepository.save(usuario);
+
+            return ResponseEntity.ok(Map.of("url", urlFinal));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Erro ao salvar imagem: " + e.getMessage());
+        }
+    }
+
+
+
 
 }
