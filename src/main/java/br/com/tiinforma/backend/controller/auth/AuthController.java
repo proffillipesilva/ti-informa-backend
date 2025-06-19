@@ -2,6 +2,7 @@ package br.com.tiinforma.backend.controller.auth;
 
 import br.com.tiinforma.backend.domain.criador.Criador;
 import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
+import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import br.com.tiinforma.backend.domain.dtosComuns.login.AuthLoginDto;
 import br.com.tiinforma.backend.domain.dtosComuns.login.GoogleLoginRequestDto;
 import br.com.tiinforma.backend.domain.dtosComuns.login.LoginResponseDto;
@@ -283,6 +284,7 @@ public class AuthController {
                 Criador criador = criadorOptional.get();
                 response.put("formacao", criador.getFormacao() != null ? criador.getFormacao() : "");
                 response.put("id_criador", criador.getId());
+                response.put("totalInscritos", criador.getTotalInscritos());
             }
         } else {
             response.put("interesses", usuario.getInteresses() != null ? usuario.getInteresses() : "");
@@ -527,13 +529,14 @@ public class AuthController {
         response.put("formacao", criador.getFormacao());
         response.put("funcao", criador.getFuncao().name());
         response.put("totalInscritos", criador.getTotalInscritos());
+        response.put("fotoUrl", criador.getFotoUrl());
         response.put("isCriador", criador.getFuncao() == Funcao.CRIADOR);
 
         if (criador.getUsuario() != null) {
             response.put("usuarioId", criador.getUsuario().getId());
+            response.put("descricao", criador.getUsuario().getDescricao());
         }
 
         return ResponseEntity.ok(response);
     }
-
 }

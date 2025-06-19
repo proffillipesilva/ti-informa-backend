@@ -483,4 +483,41 @@ public class StorageController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/foto-upload")
+    public ResponseEntity<String> uploadFotoUsuario(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("Arquivo não pode estar vazio");
+            }
+
+            if (!file.getContentType().startsWith("image/")) {
+                return ResponseEntity.badRequest().body("Apenas arquivos de imagem são permitidos");
+            }
+
+            String response = storageService.uploadFotoUsuario(file, userDetails.getUsername());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao fazer upload da foto: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/foto-usuario")
+    public ResponseEntity<?> getFotoUsuario(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            String fotoUrl = storageService.getFotoUsuario(userDetails.getUsername());
+            if (fotoUrl == null || fotoUrl.isEmpty()) {
+                return ResponseEntity.ok().body(Collections.singletonMap("fotoUrl", ""));
+            }
+            return ResponseEntity.ok().body(Collections.singletonMap("fotoUrl", fotoUrl));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao buscar foto do usuário: " + e.getMessage());
+        }
+    }
 }
+
