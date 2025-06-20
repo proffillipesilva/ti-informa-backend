@@ -6,6 +6,8 @@ import br.com.tiinforma.backend.domain.userDetails.UserDetailsImpl;
 import br.com.tiinforma.backend.domain.usuario.*;
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorCreateDto;
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorResponseDto;
+import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
+import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +18,22 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -145,5 +156,4 @@ public class UsuarioController {
         usuarioService.atualizarDescricao(userDetails.getId(), dto.getDescricao());
         return ResponseEntity.ok().build();
     }
-
 }

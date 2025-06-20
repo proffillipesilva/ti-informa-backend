@@ -11,6 +11,8 @@ public interface CriadorRepository extends JpaRepository<Criador, Long> {
 
     Optional<Criador> findByCpf(String cpf);
 
+    Optional<Criador> findByUsuarioId(Long usuarioId);
+
     List<Criador> findByStatusSolicitacao(String status);
 
     boolean existsByCpf(String cpf);

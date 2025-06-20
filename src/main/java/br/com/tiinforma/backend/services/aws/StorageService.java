@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -191,5 +192,42 @@ public class StorageService  {
             log.error("Erro ao converter multiplos arquivos" + e);
         }
         return convertFile;
+    }
+
+    @Transactional
+    public String uploadFotoUsuario(MultipartFile file, String email) throws IOException {
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new IllegalArgumentException("O tamanho da imagem não pode exceder 5MB");
+        }
+
+        String[] allowedTypes = {"image/jpeg", "image/png", "image/jpg"};
+        if (!Arrays.asList(allowedTypes).contains(file.getContentType())) {
+            throw new IllegalArgumentException("Apenas imagens JPEG, JPG ou PNG são permitidas");
+        }
+
+        String fileName = "user-photos/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(file.getContentType());
+        metadata.setContentLength(file.getSize());
+
+        s3Client.putObject(new PutObjectRequest(bucketName, fileName,
+                file.getInputStream(), metadata));
+
+        String fileUrl = s3Client.getUrl(bucketName, fileName).toString();
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        usuario.setFotoUrl(fileUrl);
+        usuarioRepository.save(usuario);
+
+        return fileUrl;
+    }
+
+    public String getFotoUsuario(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return usuario.getFotoUrl();
     }
 }

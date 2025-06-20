@@ -2,6 +2,7 @@ package br.com.tiinforma.backend.domain.criador;
 
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.playlist.Playlist;
+import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.video.Video;
 import br.com.tiinforma.backend.services.interfaces.FotoAtualizavel;
 import jakarta.persistence.*;
@@ -45,6 +46,10 @@ public class Criador implements Serializable, FotoAtualizavel {
     private Funcao funcao = Funcao.CRIADOR;
 
     private String fotoUrl;
+
+    @OneToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     @OneToMany(mappedBy = "criador")
     @Builder.Default
