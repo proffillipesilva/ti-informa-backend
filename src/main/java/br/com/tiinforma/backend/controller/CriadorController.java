@@ -53,11 +53,11 @@ public class CriadorController {
         }
     }
 
-        @PostMapping("/inscricao")
-        public ResponseEntity<CriadorResponseDto> gerenciarInscricao(@RequestBody InscricaoRequestDto request) {
-            CriadorResponseDto criador = criadorService.gerenciarInscricao(request);
-            return ResponseEntity.ok(criador);
-        }
+    @PostMapping("/inscricao")
+    public ResponseEntity<CriadorResponseDto> gerenciarInscricao(@RequestBody InscricaoRequestDto request) {
+        CriadorResponseDto criador = criadorService.gerenciarInscricao(request);
+        return ResponseEntity.ok(criador);
+    }
 
         @GetMapping("/{id}/inscritos")
         public ResponseEntity<Integer> getTotalInscritos(@PathVariable Long id) {

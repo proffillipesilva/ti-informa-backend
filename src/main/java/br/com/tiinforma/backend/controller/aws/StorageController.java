@@ -519,5 +519,21 @@ public class StorageController {
                     .body("Erro ao buscar foto do usuário: " + e.getMessage());
         }
     }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<VideoResponseDto>> buscarVideosPorTitulo(@RequestParam String termo) {
+        try {
+            List<Video> videos = videoRepository.findByTituloContainingIgnoreCase(termo);
+
+            List<VideoResponseDto> response = videos.stream()
+                    .map(this::convertToResponseDto)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Erro ao buscar vídeos por título", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
 

@@ -8,6 +8,7 @@ import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorCreate
 import br.com.tiinforma.backend.domain.usuario.administrador.AdministradorResponseDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
+import br.com.tiinforma.backend.services.interfaces.InscritosService;
 import br.com.tiinforma.backend.services.interfaces.UsuarioService;
 import br.com.tiinforma.backend.util.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class UsuarioController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private InscritosService inscritosService;
 
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,"application/x-yml"})
     public ResponseEntity<UsuarioModel> findById(@PathVariable Long id) {
@@ -156,4 +160,24 @@ public class UsuarioController {
         usuarioService.atualizarDescricao(userDetails.getId(), dto.getDescricao());
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/check/{creatorId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> verificarInscricao(@PathVariable Long creatorId,
+                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            Long userId = userDetails.getId();
+            boolean isInscrito = inscritosService.verificarInscricao(userId, creatorId);
+
+            return ResponseEntity.ok(Map.of(
+                    "isSubscribed", isInscrito,
+                    "userId", userId,
+                    "creatorId", creatorId
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erro ao verificar inscrição: " + e.getMessage()));
+        }
+    }
+
 }

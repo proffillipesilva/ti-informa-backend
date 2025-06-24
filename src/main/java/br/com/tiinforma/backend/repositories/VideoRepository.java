@@ -22,4 +22,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
     @Query("SELECT v FROM Video v ORDER BY v.dataPublicacao DESC")
     List<Video> findAllOrderByDataPublicacaoDesc();
+
+    List<Video> findByTituloContainingIgnoreCase(String titulo);
 }

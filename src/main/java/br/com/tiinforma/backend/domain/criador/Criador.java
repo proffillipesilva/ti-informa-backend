@@ -48,7 +48,7 @@ public class Criador implements Serializable, FotoAtualizavel {
     private String fotoUrl;
 
     @OneToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
     @OneToMany(mappedBy = "criador")

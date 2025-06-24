@@ -5,16 +5,20 @@ import br.com.tiinforma.backend.domain.criador.CriadorCreateDto;
 import br.com.tiinforma.backend.domain.criador.CriadorResponseDto;
 import br.com.tiinforma.backend.domain.enums.Funcao;
 import br.com.tiinforma.backend.domain.inscricao.InscricaoRequestDto;
+import br.com.tiinforma.backend.domain.inscricao.Inscritos;
 import br.com.tiinforma.backend.domain.usuario.Usuario;
 import br.com.tiinforma.backend.domain.usuario.UsuarioCreateDto;
 import br.com.tiinforma.backend.exceptions.ResourceNotFoundException;
 import br.com.tiinforma.backend.repositories.CriadorRepository;
+import br.com.tiinforma.backend.repositories.InscritosRepository;
 import br.com.tiinforma.backend.repositories.UsuarioRepository;
 import br.com.tiinforma.backend.services.interfaces.CriadorService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +30,12 @@ public class CriadorImpl implements CriadorService {
 
     @Autowired
     private ModelMapper modelMapper;
+
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private InscritosRepository inscritosRepository;
 
 
     @Override
@@ -111,13 +119,25 @@ public class CriadorImpl implements CriadorService {
     }
 
     @Override
+    @Transactional
     public CriadorResponseDto gerenciarInscricao(InscricaoRequestDto request) {
         Criador criador = criadorRepository.findById(request.getCriadorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"));
 
+        Usuario usuario = usuarioRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
         if (request.isInscrever()) {
-            criador.setTotalInscritos(criador.getTotalInscritos() + 1);
+            if (!inscritosRepository.existsByUsuarioIdAndCriadorId(request.getUserId(), request.getCriadorId())) {
+                Inscritos inscricao = new Inscritos();
+                inscricao.setUsuario(usuario);
+                inscricao.setCriador(criador);
+                inscricao.setDataInscricao(LocalDateTime.now());
+                inscritosRepository.save(inscricao);
+                criador.setTotalInscritos(criador.getTotalInscritos() + 1);
+            }
         } else {
+            inscritosRepository.deleteByUsuarioIdAndCriadorId(request.getUserId(), request.getCriadorId());
             criador.setTotalInscritos(Math.max(0, criador.getTotalInscritos() - 1));
         }
 
@@ -127,9 +147,7 @@ public class CriadorImpl implements CriadorService {
 
     @Override
     public Integer getTotalInscritos(Long criadorId) {
-        return criadorRepository.findById(criadorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Criador não encontrado"))
-                .getTotalInscritos();
+        return inscritosRepository.countByCriadorId(criadorId);
     }
 
 }
