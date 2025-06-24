@@ -282,6 +282,7 @@ public class AuthController {
             Optional<Criador> criadorOptional = criadorRepository.findByEmail(usuario.getEmail());
             if (criadorOptional.isPresent()) {
                 Criador criador = criadorOptional.get();
+                response.put("nomeCriador", criador.getNome());
                 response.put("formacao", criador.getFormacao() != null ? criador.getFormacao() : "");
                 response.put("id_criador", criador.getId());
                 response.put("totalInscritos", criador.getTotalInscritos());
