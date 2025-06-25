@@ -150,4 +150,9 @@ public class VideoImpl implements VideoService {
         return videoRepository.findAllOrderByDataPublicacaoDesc();
     }
 
+    @Override
+    public List<Video> buscarVideosPorTermo(String termo) {
+        return videoRepository.buscarPorTermo(termo);
+    }
+
 }

@@ -24,4 +24,7 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     List<Video> findAllOrderByDataPublicacaoDesc();
 
     List<Video> findByTituloContainingIgnoreCase(String titulo);
+
+    @Query("SELECT v FROM Video v WHERE LOWER(v.titulo) LIKE LOWER(CONCAT('%', :termo, '%')) OR LOWER(v.descricao) LIKE LOWER(CONCAT('%', :termo, '%'))")
+    List<Video> buscarPorTermo(@Param("termo") String termo);
 }

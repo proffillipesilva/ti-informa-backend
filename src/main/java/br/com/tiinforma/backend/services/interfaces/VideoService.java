@@ -26,4 +26,6 @@ public interface VideoService {
     List<Video> buscarVideosMaisAvaliados();
 
     List<Video> buscarVideosRecentes();
+
+    List<Video> buscarVideosPorTermo(String termo);
 }
